@@ -257,18 +257,13 @@ sub bearer
 sub headers
 {
   my $self = shift;
-  my $rc = $self->bearer();
+  my $rc = $self->SUPER::headers();
   my $headers;
 
-  if( ! $rc->{ error } ) {
-    $headers = Eulerian::Request->headers();
-    $headers->push_header( 'Authorization', 'bearer ' . $rc->{ bearer } );
-    $headers->push_header( 'Content-Type', 'application/json' );
-    $headers->push_header( 'Accept', $self->accept() );
-    $headers->push_header( 'Accept-Encoding', $self->encoding() );
-    $rc->{ headers } = $headers;
-    delete $rc->{ bearer };
-  }
+  $headers = $rc->{ headers } if !$rc->{ error };
+  $headers->push_header( 'Content-Type', 'application/json' );
+  $headers->push_header( 'Accept', $self->accept() );
+  $headers->push_header( 'Accept-Encoding', $self->encoding() );
 
   return $rc;
 }

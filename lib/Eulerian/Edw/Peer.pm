@@ -254,6 +254,67 @@ sub dump
 
 }
 #
+# @brief Get Authorization bearer value from Eulerian Authority Services.
+#
+# @param $self - Eulerian Data Warehouse Peer.
+#
+# @return Authorization Bearer.
+#
+sub bearer
+{
+  my $self = shift;
+  my $bearer = $self->{ _BEARER };
+  my %hrc;
+  my $rc;
+
+  if( ! defined( $bearer ) ) {
+    # Request Authority Services for a valid bearer
+    $rc = Eulerian::Authority->bearer(
+      $self->kind(), $self->platform(),
+      $self->grid(), $self->ip(),
+      $self->token()
+      );
+    # Cache bearer value for next use
+    $self->{ _BEARER } = $rc->{ bearer } if ! $rc->{ error };
+  } else {
+    # Return Cached bearer value
+    %hrc = (
+      error => 0,
+      bearer => $bearer,
+    );
+    $rc = \%hrc;
+  }
+
+  return $rc;
+}
+#
+#
+# @brief Default HTTP Request Headers.
+#
+# @param $self - Eulerian Data Warehouse Peer.
+#
+# @return HTTP Headers.
+#
+sub headers
+{
+  my $self = shift;
+  my $rc = $self->bearer();
+  my $headers;
+
+  if( ! $rc->{ error } ) {
+    # Create a new Object Headers
+    $headers = Eulerian::Request->headers();
+    # Setup Authorization Header value
+    $headers->push_header( 'Authorization', $rc->{ bearer } );
+    # Setup reply context
+    $rc->{ headers } = $headers;
+    # Remove bearer
+    delete $rc->{ bearer };
+  }
+
+  return $rc;
+}
+#
 # @brief
 #
 # @param $self - Eulerian Data Warehouse Peer.
