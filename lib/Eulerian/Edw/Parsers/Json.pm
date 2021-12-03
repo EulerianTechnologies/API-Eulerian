@@ -1,0 +1,180 @@
+#/usr/bin/env perl
+###############################################################################
+#
+# @file Json.pm
+#
+# @brief Eulerian Data Warehouse REST Json Parser Module definition.
+#
+# @author Thorillon Xavier:x.thorillon@eulerian.com
+#
+# @date 26/11/2021
+#
+# @version 1.0
+#
+###############################################################################
+#
+# Setup module name
+#
+package Eulerian::Edw::Parsers::Json;
+#
+# Enforce compilor rules
+#
+use strict; use warnings;
+#
+# Inherited interface from Eulerian::Edw::Parser
+#
+use parent 'Eulerian::Edw::Parser';
+#
+#
+#
+use JSON::Streaming::Reader;
+#
+#
+#
+use FileHandle;
+#
+# @brief
+#
+# @param $class - Eulerian::Edw::Parser class.
+# @param $path - File Path.
+#
+# @return Eulerian::Edw::Json Parser.
+#
+sub new
+{
+  my ( $class, $path ) = @_;
+  my $self;
+  my $fd;
+
+  # Setup base class instance
+  $self = $class->SUPER::new( $path );
+
+  # Create a new FileHandle
+  $self->{ _FD } = $fd = FileHandle->new();
+
+  # Open FileHandle
+  $fd->open( "< $path" );
+
+  # Create Json parser
+  $self->{ _PARSER } = JSON::Streaming::Reader->for_stream( $fd );
+
+  return $self;
+}
+#
+# @brief
+#
+# @param $self
+#
+# @return
+#
+sub parser
+{
+  return shift->{ _PARSER };
+}
+#
+# @brief
+#
+# @param $self - Eulerian::Edw::Parser
+#
+sub do
+{
+  my ( $self, $hooks ) = @_;
+  my $parser = $self->parser();
+  my $depth = -1;
+  my @in = ();
+  my $uuid;
+  my $msg;
+  my $key;
+
+  # Parse JSON stream
+  $parser->process_tokens(
+    # Property begin
+    start_property => sub
+    {
+      $key = shift;
+    },
+    # Property end
+    end_property => sub
+    {
+    },
+    # String
+    add_string => sub
+    {
+      my $parent = $in[ $depth ];
+      if( ref( $parent ) eq 'ARRAY' ) {
+        $parent->[ scalar( @$parent ) ] = shift;
+      } elsif( ref( $parent ) eq 'HASH' ) {
+        $parent->{ $key } = shift;
+      }
+    },
+    # Number
+    add_number => sub
+    {
+      my $parent = $in[ $depth ];
+      if( ref( $parent ) eq 'ARRAY' ) {
+        $parent->[ scalar( @$parent ) ] = shift;
+      } elsif( ref( $parent ) eq 'HASH' ) {
+        $parent->{ $key } = shift;
+      }
+    },
+    # Null
+    add_null => sub
+    {
+      my $parent = $in[ $depth ];
+      if( ref( $parent ) eq 'ARRAY' ) {
+        $parent->[ scalar( @$parent ) ] = undef;
+      } elsif( ref( $parent ) eq 'HASH' ) {
+        $parent->{ $key } = undef;
+      }
+    },
+    # Object begin
+    start_object => sub
+    {
+      $in[ ++$depth ] = {};
+    },
+    # Object end
+    end_object => sub
+    {
+      my $parent = $in[ $depth - 1 ] if $depth > 0;
+      if( ref( $parent ) eq 'ARRAY' ) {
+        $parent->[ scalar( @$parent ) ] = $in[ $depth ];
+      } elsif( ref( $parent ) eq 'HASH' ) {
+        $parent->{ $key } = $in[ $depth ];
+      }
+      if( $depth == 1 ) {
+        $msg = $in[ $depth ];
+        $uuid = $msg->{ uuid };
+        $hooks->on_headers(
+          $self, $uuid, $msg->{ from }, $msg->{ to },
+          $msg->{ schema }
+          );
+      }
+      $depth--;
+    },
+    # Array begin
+    start_array => sub
+    {
+      $in[ ++$depth ] = [];
+    },
+    # Array end
+    end_array => sub
+    {
+      my $parent = $in[ $depth - 1 ] if $depth > 0;
+      if( ref( $parent ) eq 'ARRAY' ) {
+        $parent->[ scalar( @$parent ) ] = $in[ $depth ];
+      } elsif( ref( $parent ) eq 'HASH' ) {
+        $parent->{ $key } = $in[ $depth ];
+      }
+      if( $depth == 2 && $uuid ) {
+        $hooks->on_add( $self, $uuid, [ $in[ $depth ] ] );
+      }
+      $depth--;
+    },
+  );
+  $hooks->on_status( $self, $uuid, '', 0, 'Success', 0 );
+
+}
+#
+# Endup module properly
+#
+1;
