@@ -169,7 +169,7 @@ sub success
   my $row  = $rows->[ 0 ];
   return (
     error => 0,
-    bearer => $row->{ $kind . '_token' }
+    bearer => 'bearer ' . $row->{ $kind . '_token' }
     );
 }
 #
