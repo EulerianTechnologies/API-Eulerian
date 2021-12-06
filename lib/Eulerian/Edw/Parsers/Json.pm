@@ -37,17 +37,18 @@ use FileHandle;
 #
 # @param $class - Eulerian::Edw::Parser class.
 # @param $path - File Path.
+# @param $uuid - Request UUID.
 #
 # @return Eulerian::Edw::Json Parser.
 #
 sub new
 {
-  my ( $class, $path ) = @_;
+  my ( $class, $path, $uuid ) = @_;
   my $self;
   my $fd;
 
   # Setup base class instance
-  $self = $class->SUPER::new( $path );
+  $self = $class->SUPER::new( $path, $uuid );
 
   # Create a new FileHandle
   $self->{ _FD } = $fd = FileHandle->new();
@@ -76,6 +77,7 @@ sub parser
 #
 # @param $self - Eulerian::Edw::Parser
 #
+use Data::Dumper;
 sub do
 {
   my ( $self, $hooks ) = @_;
@@ -143,9 +145,11 @@ sub do
       }
       if( $depth == 1 ) {
         $msg = $in[ $depth ];
+        #print( Dumper( $msg ) . "\n" ); die "";
         $uuid = $msg->{ uuid };
+        print( "UUID : $uuid\n" );
         $hooks->on_headers(
-          $self, $uuid, $msg->{ from }, $msg->{ to },
+          $uuid, $msg->{ from }, $msg->{ to },
           $msg->{ schema }
           );
       }
@@ -166,12 +170,12 @@ sub do
         $parent->{ $key } = $in[ $depth ];
       }
       if( $depth == 2 && $uuid ) {
-        $hooks->on_add( $self, $uuid, [ $in[ $depth ] ] );
+        $hooks->on_add( $uuid, [ $in[ $depth ] ] );
       }
       $depth--;
     },
   );
-  $hooks->on_status( $self, $uuid, '', 0, 'Success', 0 );
+  $hooks->on_status( $uuid, '', 0, 'Success', 0 );
 
 }
 #

@@ -33,18 +33,19 @@ use Text::CSV;
 #
 # @param $class - Eulerian::Edw::Parser class.
 # @param $path - File Path.
+# @param $uuid - Request uuid.
 #
 # @return Eulerian::Edw::Json Parser.
 #
 sub new
 {
-  my ( $class, $path ) = @_;
+  my ( $class, $path, $uuid ) = @_;
   my $self;
   my $file;
   my $fd;
 
   if( open( $file, '<:encoding(utf8)', $path ) ) {
-    $self = $class->SUPER::new( $path );
+    $self = $class->SUPER::new( $path, $uuid );
     $self->{ _FILE } = $file;
     $self->{ _PARSER } = Text::CSV->new( {
       binary => 1,
@@ -87,8 +88,8 @@ sub do
   my ( $self, $hooks ) = @_;
   my $parser = $self->parser();
   my $file = $self->file();
+  my $uuid = $self->uuid();
   my @headers = ();
-  my $uuid = 0;
   my $start = 0;
   my $end = 0;
   my @rows;
@@ -98,12 +99,9 @@ sub do
   $line = <$file>; chomp $line;
   if( $parser->parse( $line ) ) {
     foreach my $field ( $parser->fields() ) {
-      push @headers, ( 'UNKNOWN', $field );
+      push @headers, [ 'UNKNOWN', $field ];
     }
-    if( $hooks->on_headers(
-      $uuid, $start, $end, \@headers ) ) {
-      return;
-    }
+    $hooks->on_headers( $uuid, $start, $end, \@headers );
   }
 
   # Process Next lines
@@ -111,13 +109,11 @@ sub do
     chomp $line;
     if( $parser->parse( $line ) ) {
       @rows = [ $parser->fields() ];
-      if( $hooks->on_add( $uuid, \@rows ) ) {
-        return;
-      }
+      $hooks->on_add( $uuid, \@rows );
     }
   }
 
-  $hooks->on_status( $self, $uuid, '', 0, 'Success', 0 );
+  $hooks->on_status( $uuid, '', 0, 'Success', 0 );
 
 }
 #

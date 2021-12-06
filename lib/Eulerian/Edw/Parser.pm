@@ -25,15 +25,30 @@ use strict; use warnings;
 #
 # @param $class
 # @param $path
+# @param $uuid
 #
 # @return
 #
 sub new
 {
-  my ( $class, $path ) = @_;
-  return bless(
-    { _PATH => $path, }, $class
-    );
+  my ( $class, $path, $uuid ) = @_;
+  return bless( {
+      _PATH => $path,
+      _UUID => $uuid,
+    }, $class );
+}
+#
+# @brief
+#
+# @parm $self -
+#
+# @return
+#
+sub uuid
+{
+  my ( $self, $uuid ) = @_;
+  $self->{ _UUID } = $uuid if $uuid;
+  return $self->{ _UUID };
 }
 #
 # @brief
