@@ -174,14 +174,19 @@ sub join
 {
   my ( $self, $url, $hook ) = @_;
   my $socket = $self->socket();
-  my $bufsize = 16384;
+  my $bufsize = 252000;
+  #my $bufsize = 65535 * 4;
   my $offset = 0;
   my $buf = '';
   my $read;
   my $rfds;
   my $peer;
+  #my %params = (
+  #  max_payload_size => $bufsize
+  #);
 
   # Create a Websocket
+  #$peer = Protocol::WebSocket::Client->new( url => $url, %params );
   $peer = Protocol::WebSocket::Client->new( url => $url );
 
   # Setup Websocket hooks

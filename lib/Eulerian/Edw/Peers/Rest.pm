@@ -243,7 +243,7 @@ sub headers
   my $rc = $self->SUPER::headers();
   my $headers;
 
-  $headers = $rc->{ headers } if !$rc->{ error };
+  $headers = $rc->{ headers } if ! $rc->{ error };
   $headers->push_header( 'Content-Type', 'application/json' );
   $headers->push_header( 'Accept', $self->accept() );
   $headers->push_header( 'Accept-Encoding', $self->encoding() );

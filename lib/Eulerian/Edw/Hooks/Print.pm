@@ -62,11 +62,6 @@ sub setup
 sub on_headers
 {
   my ( $self, $uuid, $start, $end, $columns ) = @_;
-
-
-  print( "$self | $uuid | $start | $end\n" );
-
-
   my $string = <<string_end;
   {
     . UUID      : $uuid
@@ -80,6 +75,7 @@ string_end
     if( ref( $column ) eq 'ARRAY' ) {
       $string .= "        $column->[ 0 ] : $column->[ 1 ],\n";
     } else {
+      # Thin Peer doesnt return columns types
       $string .= "        $column : UNKNOWN,\n";
     }
   }
@@ -156,7 +152,6 @@ sub on_status
   my ( $self, $uuid, $token, $errnum, $err, $updated ) = @_;
   my $string = <<string_end;
     $uuid : {
-     token => '$token',
      error_code => $errnum,
      error_msg => $err,
     }

@@ -59,7 +59,7 @@ sub new
   $self->host( 'edwaro' );
 
   # Setup Default ports value
-  $self->ports( [ 80, 8080 ] );
+  $self->ports( [ 8080, 447 ] );
 
   # Setup Rest Peer Attributes
   $self->setup( $setup );
@@ -140,9 +140,15 @@ sub create
     $response = Eulerian::Request->post(
       $self->url(), $rc->{ headers }, $command, 'text/plain'
       );
-    print Dumper( $response ) . "\n";
     # Decode reply, setup reply context
     $rc = Eulerian::Request->reply( $response );
+    my $json = Eulerian::Request->json( $response );
+    if( defined( $json ) && $json->{ status }->[ 1 ] != 0 ) {
+      $rc->{ error } = 1;
+      $rc->{ error_msg } = $json->{ status }->[ 0 ];
+      $rc->{ error_code } = $json->{ status }->[ 1 ];
+    }
+
   }
 
   return $rc;
@@ -251,7 +257,7 @@ sub cancel
 
   # Get Valid Headers
   $rc = $self->headers();
-  if( ! $rc->{ error } ) {
+  if( ! $rc->{ error } && exists( $self->{ uuid } ) ) {
     my $uuid = $self->{ uuid };
     my $command = "KILL $uuid;";
     my $response;

@@ -216,12 +216,19 @@ sub setup
   $self->kind( $setup->{ kind } ) if exists( $setup->{ kind } );
   $self->platform( $setup->{ platform } ) if exists( $setup->{ platform } );
   $self->hooks( $setup->{ hooks } ) if exists( $setup->{ hooks } );
+  $self->secure( $setup->{ secure } ) if exists( $setup->{ secure } );
   $self->token( $setup->{ token } ) if exists( $setup->{ token } );
   $self->grid( $setup->{ grid } ) if exists( $setup->{ grid } );
-  $self->secure( $setup->{ secure } ) if exists( $setup->{ secure } );
   $self->ip( $setup->{ ip } ) if exists( $setup->{ ip } );
   $self->host( $setup->{ host } ) if exists( $setup->{ host } );
   $self->ports( $setup->{ ports } ) if exists( $setup->{ ports } );
+
+  # Check setup validity
+  # ip && grid && token are mandatories
+
+
+
+
   $self->dump();
 
 }

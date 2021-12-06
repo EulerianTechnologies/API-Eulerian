@@ -57,6 +57,23 @@ sub url
   my ( $class, $kind, $platform, $grid, $ip, $token ) = @_;
   my $domain = $DOMAINS{ $platform };
   my $url = undef;
+  my %rc;
+  #
+  # Sanity check mandatories arguments
+  #
+  if( ! defined( $grid ) ) {
+    return $class->error(
+      406, "Mandatory argument 'grid' is missing"
+      );
+  } elsif( ! defined( $ip ) ) {
+    return $class->error(
+      406, "Mandatory argument 'ip' is missing"
+    );
+  } elsif( ! defined( $token ) ) {
+    return $class->error(
+      406, "Mandatory argument 'token' is missing"
+    );
+  }
   #
   # URL formats are :
   #
@@ -72,15 +89,22 @@ sub url
   #
   #   <Start>get_dw_access_token.json?ip=<ip>&output-as-kv=1
   #
-  $kind = $KINDS{ $kind };
-  if( $domain && $kind ) {
+  if( ! ( $kind = $KINDS{ $kind } ) ) {
+    return $class->error( 406, "Invalid token kind : $kind" );
+  } elsif( ! ( $domain = $DOMAINS{ $platform } ) ) {
+    return $class->error( 506, "Invalid platform : $platform" );
+  } else {
     $url  = 'https://';
     $url .= $grid . '.';
     $url .= $domain . '/ea/v2/';
     $url .= $token . $kind;
     $url .= $ip . '&output-as-kv=1';
+    %rc = (
+      error => 0,
+      url => $url,
+    );
   }
-  return $url;
+  return %rc;
 }
 #
 # @brief Get valid HTTP Authorization bearer used to access Eulerian
@@ -100,14 +124,14 @@ sub bearer
   my ( $class, $kind, $platform, $grid, $ip, $token ) = @_;
   my $code = 400;
   my $json;
-  my $url;
   my %rc;
 
   # Get URL used to request Eulerian Authority for Token.
-  if( ( $url = $class->url(
-    $kind, $platform, $grid, $ip, $token ) ) ) {
+  %rc = $class->url( $kind, $platform, $grid, $ip, $token );
+  # Handle errors
+  if( ! $rc{ error } ) {
     # Request Eulerian Authority
-    my $response = Eulerian::Request->get( $url );
+    my $response = Eulerian::Request->get( $rc{ url } );
     # Get HTTP response code
     $code = $response->code;
     # We expect JSON reply data
@@ -123,10 +147,6 @@ sub bearer
           $response->decoded_content
         );
     }
-  } else {
-    %rc = $class->error(
-      $code, "Failed to get valid URL to Eulerian Authority"
-      );
   }
 
   return \%rc;
