@@ -58,6 +58,9 @@ sub new
   # Setup Default host value
   $self->host( 'edwaro' );
 
+  # Setup Default ports value
+  $self->ports( [ 80, 8080 ] );
+
   # Setup Rest Peer Attributes
   $self->setup( $setup );
 
@@ -123,6 +126,7 @@ sub url
 #
 # @return Reply context.
 #
+use Data::Dumper;
 sub create
 {
   my ( $self, $command ) = @_;
@@ -136,6 +140,7 @@ sub create
     $response = Eulerian::Request->post(
       $self->url(), $rc->{ headers }, $command, 'text/plain'
       );
+    print Dumper( $response ) . "\n";
     # Decode reply, setup reply context
     $rc = Eulerian::Request->reply( $response );
   }
@@ -149,6 +154,7 @@ sub create
 # @param $ws - Eulerian WebSocket.
 # @param $buf - Received buffer.
 #
+use Data::Dumper;
 sub dispatcher
 {
   my ( $ws, $buf ) = @_;
@@ -158,28 +164,29 @@ sub dispatcher
   my $self = $ws->{ _THIN };
   my $hooks = $self->hooks();
   my $rows = $json->{ rows };
-  my $rc;
 
   switch( $type ) {
     case 'add' {
-      $rc = $hooks->on_add( $json->{ uuid }, $json->{ rows } );
+      $hooks->on_add( $json->{ uuid }, $json->{ rows } );
     }
     case 'replace' {
-      $rc = $hooks->on_replace( $json->{ uuid }, $json->{ rows } );
+      $hooks->on_replace( $json->{ uuid }, $json->{ rows } );
     }
     case 'headers' {
-      $rc =$hooks->on_headers(
+      #print Dumper( $json ) . "\n";
+      $self->{ uuid } = $uuid;
+      $hooks->on_headers(
         $json->{ uuid }, $json->{ timerange }->[ 0 ],
         $json->{ timerange }->[ 1 ], $json->{ columns }
       );
     }
     case 'progress' {
-      $rc = $hooks->on_progress(
+      $hooks->on_progress(
         $json->{ uuid }, $json->{ progress }
       );
     }
     case 'status' {
-      $rc =$hooks->on_status(
+      $hooks->on_status(
         $json->{ uuid }, $json->{ aes }, $json->{ status }->[ 1 ],
         $json->{ status }->[ 0 ], $json->{ status }->[ 2 ]
       );
@@ -187,7 +194,6 @@ sub dispatcher
     else {}
   }
 
-  return $rc;
 }
 #
 # @brief Join Websocket stream, raise callback hooks accordingly to received
@@ -202,7 +208,9 @@ sub join
 {
   my ( $self, $rc ) = @_;
   my $json = Eulerian::Request->json( $rc->{ response } );
-  my $ws = Eulerian::WebSocket->new( 'etdev4', 8080 );
+  my $ws = Eulerian::WebSocket->new(
+    $self->host(), $self->ports()->[ $self->secure() ]
+    );
   my $url = $self->url( $json->{ aes } );
   $ws->{ _THIN } = $self;
   return $ws->join( $url, \&dispatcher );
@@ -238,8 +246,28 @@ sub request
 #
 sub cancel
 {
-  my ( $self, $rc ) = @_;
+  my ( $self ) = @_;
+  my $rc;
 
+  # Get Valid Headers
+  $rc = $self->headers();
+  if( ! $rc->{ error } ) {
+    my $uuid = $self->{ uuid };
+    my $command = "KILL $uuid;";
+    my $response;
+
+    # Post new JOB to Eulerian Data Warehouse Platform
+    $response = Eulerian::Request->post(
+      $self->url(), $rc->{ headers }, $command, 'text/plain'
+      );
+
+    #print Dumper( $response ) . "\n";
+    # Decode reply, setup reply context
+    $rc = Eulerian::Request->reply( $response );
+
+  }
+
+  return $rc;
 }
 #
 # End Up module properly

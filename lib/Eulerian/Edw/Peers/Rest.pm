@@ -82,11 +82,26 @@ sub new
   $self->{ _ACCEPT } = 'application/json';
   $self->{ _ENCODING } = 'gzip';
   $self->{ _WDIR } = '.';
+  $self->{ _UUID } = 0;
 
   # Setup Rest Peer Attributes
   $self->setup( $setup );
 
   return $self;
+}
+#
+# @brief UUID attribute accessors.
+#
+# @param $self - Eulerian Data Warehouse Peer.
+# @param $uuid - Request UUID.
+#
+# @return UUID.
+#
+sub uuid
+{
+  my ( $self, $uuid ) = @_;
+  $self->{ _UUID } = $uuid if defined( $uuid );
+  return $self->{ _UUID };
 }
 #
 # @brief Encoding attribute accessors.
@@ -143,7 +158,7 @@ sub setup
   # Setup base interface values
   $self->SUPER::setup( $setup );
 
-  # Setup Rest Peer specifics options
+  # Setup Rest specifics options
   $self->accept( $setup->{ accept } ) if exists( $setup->{ accept } );
   $self->encoding( $setup->{ encoding } ) if exists( $setup->{ encoding } );
   $self->wdir( $setup->{ wdir } ) if exists( $setup->{ wdir } );
@@ -216,38 +231,6 @@ sub body
   return encode_json( \%body );
 };
 #
-# @brief Get Authorization bearer value from Eulerian Authority Services.
-#
-# @param $self - Eulerian Data Warehouse Peer.
-#
-# @return Authorization Bearer.
-#
-sub bearer
-{
-  my $self = shift;
-  my $bearer = $self->{ _BEARER };
-  my %hrc;
-  my $rc;
-
-  if( ! $bearer ) {
-    $rc = Eulerian::Authority->bearer(
-      $self->kind(), $self->platform(),
-      $self->grid(), $self->ip(),
-      $self->token()
-      );
-    $self->{ _BEARER } = $rc->{ bearer }
-      if ! $rc->{ error };
-  } else {
-    %hrc = (
-      error => 0,
-      bearer => $bearer,
-    );
-    $rc = \%hrc;
-  }
-
-  return $rc;
-}
-#
 # @brief Setup HTTP Request Headers.
 #
 # @param $self - Eulerian Data Warehouse Peer.
@@ -275,6 +258,7 @@ sub headers
 #
 # @return Reply content.
 #
+use Data::Dumper;
 sub create
 {
   my ( $self, $command ) = @_;
@@ -288,6 +272,10 @@ sub create
       $url, $rc->{ headers }, $self->body( $command )
       );
     $rc = Eulerian::Request->reply( $response );
+    if( ! $rc->{ error } ) {
+      my $json = Eulerian::Request->json( $response );
+      $self->uuid( $json->{ data }->[ 0 ] );
+    }
   }
 
   return $rc;
@@ -367,7 +355,6 @@ sub path
   my $url = $json->{ data }->[ 1 ];
   my $wdir = $self->wdir();
   my %rc = ();
-  my $path;
 
   if( ! $wdir ) {
     %rc = (
@@ -388,11 +375,13 @@ sub path
       error_msg => 'Unknown local file name',
       );
   } else {
-    $rc{ error } = 0;
-    $rc{ url }   = $url;
-    $rc{ path }  = $self->wdir() . '/';
-    $rc{ path } .= "$1.$2";
-    $rc{ path } .= '.gz' if $encoding eq 'gzip';
+    my $path = $wdir. '/' . "$1.$2";
+    $path .= '.gz' if $encoding eq 'gzip';
+    %rc = (
+      error => 0,
+      url => $url,
+      path => $path,
+    );
   }
 
   return \%rc;
@@ -409,12 +398,22 @@ sub unzip
 {
   my( $self, $zipped ) = @_;
   my $unzipped;
+
+  # Parse zipped file
   $zipped =~ /(.*)\.gz/;
+
+  # Unzipped file name
   $unzipped = $1;
+
+  # Gunzip zipped file into unzipped file
   IO::Uncompress::Gunzip::gunzip(
     $zipped, $unzipped, BinModeOut => 1
     );
+
+  # Remove zipped file
   unlink $zipped;
+
+  # Return path to unzipped file
   return $unzipped;
 }
 #
@@ -429,21 +428,32 @@ sub download
 {
   my ( $self, $rc ) = @_;
 
+  # From Last status message compute local file path
   $rc = $self->path( $rc->{ response } );
+
+  # If no error
   if( ! $rc->{ error } ) {
     my $path = $rc->{ path };
     my $url = $rc->{ url };
+    my $response;
 
+    # Get HTTP request headers
     $rc = $self->headers();
-    Eulerian::Request->get(
-      $url, $rc->{ headers }, $path
-      );
-    delete $rc->{ headers };
-    $rc->{ path } = $path;
-    if( ! $rc->{ error } &&
-      $self->encoding() eq 'gzip' ) {
-      $rc->{ path } = $self->unzip( $path )
+
+    if( ! $rc->{ error } ) {
+      # Send Download request to remote host, reply is
+      # writen into $path file
+      $response = Eulerian::Request->get(
+        $url, $rc->{ headers }, $path
+        );
+      $rc = Eulerian::Request->reply( $response );
+      # Handle errors
+      if( ! $rc->{ error } ) {
+        $rc->{ path } = $self->encoding() eq 'gzip' ?
+          $self->unzip( $path ) : $path;
+      }
     }
+
   }
 
   return $rc;
@@ -458,30 +468,48 @@ sub download
 #
 sub parse
 {
-  my ( $self, $rc ) = @_;
   my $pattern = '[0-9]*\.(json|csv|parquet)';
+  my ( $self, $rc ) = @_;
   my $path = $rc->{ path };
   my $parser;
   my $name;
   my %rc;
 
+  # Parse file path, get file type
   if( ( $path =~ m/$pattern/ ) ) {
+    # Lookup for parser matching file type
     if( ( $name = $PARSERS{ $1 } ) ) {
-      $parser = $name->new( $path );
-      $parser->do( $self->hooks() );
-      $rc->{ error } = 0;
+      # Create new instance of Parser
+      if( ( $parser = $name->new( $path, $self->uuid() ) ) ) {
+        # Parse reply file raise callback hooks
+        $parser->do( $self->hooks() );
+        # Return success
+        %rc = ( error => 0 );
+      } else {
+        %rc = (
+          error => 1,
+          error_msg => 'Failed to create Parser',
+          error_code => 401,
+        );
+      }
     } else {
-      $rc->{ error } = 1;
-      $rc->{ error_msg } = 'Not Yet implemented file format';
-      $rc->{ error_code } = 501;
+      # Unknown file type
+      %rc = (
+        error => 1,
+        error_msg => 'Not yet implemented file format',
+        error_code => 501,
+      );
     }
   } else {
-    $rc->{ error } = 1;
-    $rc->{ error_msg } = 'Unknown file format';
-    $rc->{ error_code } = 401;
+    # Unparsable file name
+    %rc = (
+      error => 1,
+      error_msg => 'Unknown file format',
+      error_code => 401,
+    );
   }
 
-  return $rc;
+  return \%rc;
 }
 #
 # @brief Do Request on Eulerian Data Warehouse Platform.
@@ -508,6 +536,7 @@ sub request
   if( $self->done( $rc ) ) {
     $rc = $self->download( $rc );
     if( ! $rc->{ error } ) {
+      # Parse reply file, call hooks
       $rc = $self->parse( $rc );
     }
   }
@@ -522,8 +551,33 @@ sub request
 #
 sub cancel
 {
-  my ( $self, $rc ) = @_;
+  my ( $self ) = @_;
+  my $rc;
 
+  # Get HTTP request headers
+  $rc = $self->headers();
+  if( ! $rc->{ error } ) {
+    my $headers = $rc->{ headers };
+
+    delete $rc->{ headers };
+    # Create cancel job url
+    if( ! $self->uuid() ) {
+      $rc->{ error } = 1;
+      $rc->{ error_msg } = 'Failed to cancel Job. Unknown UUID';
+      $rc->{ error_code } = 404;
+    } else {
+      my $url = $self->url() . '/edw/jobs/';
+      my $response;
+
+      $url .= $self->uuid() . '/cancel';
+      # Send Cancel request to remote host
+      $response = Eulerian::Request->get( $url, $headers );
+      $rc = Eulerian::Request->reply( $response );
+
+    }
+  }
+
+  return $rc;
 }
 #
 # End Up module properly
