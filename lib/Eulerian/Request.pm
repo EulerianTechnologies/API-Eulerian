@@ -219,7 +219,7 @@ sub reply
     $json = $class->json( $response );
     $rc{ error_msg } = defined( $json ) ?
       encode_json( $json ) :
-      $response->status_line;
+      $response->content();
   } else {
     $rc{ error } = 0;
     $rc{ response } = $response;
