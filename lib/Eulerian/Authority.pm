@@ -44,6 +44,54 @@ my %KINDS = (
   'access'  => '/er/account/get_dw_access_token.json?ip=',
 );
 #
+# @brief Get valid HTTP Authorization bearer used to access Eulerian
+#        Data Warehouse Platform.
+#
+# @param $class - Eulerian Authority class.
+# @param $kind - Eulerian Authority token kind.
+# @param $platform - Eulerian Authority Platform.
+# @param $grid - Eulerian Data Warehouse Grid.
+# @param $ip - Peer IP.
+# @param $token - Eulerian Token.
+#
+# @return Eulerian::Status
+#
+sub bearer
+{
+  my ( $class, $kind, $platform, $grid, $ip, $token ) = @_;
+  my $response;
+  my $status;
+  my $code;
+  my $json;
+
+  # Get URL used to request Eulerian Authority for Token.
+  $status = $class->_url( $kind, $platform, $grid, $ip, $token );
+  # Handle errors
+  if( ! $status->error() ) {
+    # Request Eulerian Authority
+    $status = Eulerian::Request->get( $status->{ url } );
+    # Get HTTP response
+    $response = $status->{ response };
+    # Get HTTP response code
+    $code = $response->code;
+    # We expect JSON reply data
+    $json = Eulerian::Request->json( $response );
+    if( $json && ( $code == 200 ) ) {
+      $status = $json->{ error } ?
+        $class->_error( $code, $json->{ error_msg } ) :
+        $class->_success( $kind, $json );
+    } else {
+      $status = $class->_error(
+        $code, $json ?
+          encode_json( $json ) :
+          $response->decoded_content
+        );
+    }
+  }
+
+  return $status;
+}
+#
 # @brief Get Eulerian Authority URL used to retrieve Session/Access Token
 #        to Eulerian Data Warehouse Platform.
 #
@@ -56,7 +104,7 @@ my %KINDS = (
 #
 # @return Eulerian::Status
 #
-sub url
+sub _url
 {
   my ( $class, $kind, $platform, $grid, $ip, $token ) = @_;
   my $domain;
@@ -64,15 +112,15 @@ sub url
   # Sanity check mandatories arguments
   #
   if( ! ( defined( $grid ) && length( $grid ) > 0 ) ) {
-    return $class->error(
+    return $class->_error(
       406, "Mandatory argument 'grid' is missing or invalid"
       );
   } elsif( ! ( defined( $ip ) && length( $ip ) > 0 ) ) {
-    return $class->error(
+    return $class->_error(
       406, "Mandatory argument 'ip' is missing"
     );
   } elsif( ! ( defined( $token ) && length( $token ) > 0 ) ) {
-    return $class->error(
+    return $class->_error(
       406, "Mandatory argument 'token' is missing"
     );
   }
@@ -92,9 +140,9 @@ sub url
   #   <Start>get_dw_access_token.json?ip=<ip>&output-as-kv=1
   #
   if( ! ( $kind = $KINDS{ $kind } ) ) {
-    return $class->error( 406, "Invalid token kind : $kind" );
+    return $class->_error( 406, "Invalid token kind : $kind" );
   } elsif( ! ( $domain = $DOMAINS{ $platform } ) ) {
-    return $class->error( 506, "Invalid platform : $platform" );
+    return $class->_error( 506, "Invalid platform : $platform" );
   } else {
     my $status = Eulerian::Status->new();
     my $url;
@@ -110,55 +158,6 @@ sub url
   }
 }
 #
-# @brief Get valid HTTP Authorization bearer used to access Eulerian
-#        Data Warehouse Platform.
-#
-# @param $class - Eulerian Authority class.
-# @param $kind - Eulerian Authority token kind.
-# @param $platform - Eulerian Authority Platform.
-# @param $grid - Eulerian Data Warehouse Grid.
-# @param $ip - Peer IP.
-# @param $token - Eulerian Token.
-#
-# @return Eulerian::Status
-#
-use Data::Dumper;
-sub bearer
-{
-  my ( $class, $kind, $platform, $grid, $ip, $token ) = @_;
-  my $response;
-  my $status;
-  my $code;
-  my $json;
-
-  # Get URL used to request Eulerian Authority for Token.
-  $status = $class->url( $kind, $platform, $grid, $ip, $token );
-  # Handle errors
-  if( ! $status->error() ) {
-    # Request Eulerian Authority
-    $status = Eulerian::Request->get( $status->{ url } );
-    # Get HTTP response
-    $response = $status->{ response };
-    # Get HTTP response code
-    $code = $response->code;
-    # We expect JSON reply data
-    $json = Eulerian::Request->json( $response );
-    if( $json && ( $code == 200 ) ) {
-      $status = $json->{ error } ?
-        $class->error( $code, $json->{ error_msg } ) :
-        $class->success( $kind, $json );
-    } else {
-      $status = $class->error(
-        $code, $json ?
-          encode_json( $json ) :
-          $response->decoded_content
-        );
-    }
-  }
-
-  return $status;
-}
-#
 # @brief Return Error on Eulerian Authority Services.
 #
 # @param $class - Eulerian::Authority class.
@@ -167,7 +166,7 @@ sub bearer
 #
 # return Eulerian::Status
 #
-sub error
+sub _error
 {
   my ( $class, $code, $message ) = @_;
   my $status = Eulerian::Status->new();
@@ -185,7 +184,7 @@ sub error
 #
 # @return Eulerian::Status
 #
-sub success
+sub _success
 {
   my ( $class, $kind, $json ) = @_;
   my $status = Eulerian::Status->new();
@@ -212,7 +211,7 @@ This module is used to get Eulerian Data Warehouse Access or Session token from 
 
 =head1 METHODS
 
-=head2 bearer : 
+=head2 bearer :
 
 I<Get a valid bearer value usable in HTTP Header Authorization from Eulerian Authority services>
 
@@ -228,7 +227,7 @@ I<Get a valid bearer value usable in HTTP Header Authorization from Eulerian Aut
 
 =item * ip - Customer IP.
 
-=item * token - Customer Token. 
+=item * token - Customer Token.
 
 =back
 
@@ -240,85 +239,32 @@ I<Get a valid bearer value usable in HTTP Header Authorization from Eulerian Aut
 
 =back
 
-=head2 url : 
+=head1 SEE ALSO
 
-I<Create a valid URL to Eulerian Authority Services>. 
+L<Eulerian::Request>
 
-This method is used internally and so shouldn't be used directly.
+L<Eulerian::Status>
 
-=head3 input
+=head1 AUTHOR
 
-=over 4
+Xavier Thorillon <x.thorillon@eulerian.com>
 
-=item * kind - Token Kind ( session, access ).
+=head1 COPYRIGHT
 
-=item * platform - Eulerian Authority Services Platform ( fr, can ).
+Copyright (c) 2008 Eulerian Technologies Ltd L<http://www.eulerian.com>
 
-=item * grid - Customer Grid.
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
-=item * ip - Customer IP.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-=item * token - Customer Token. 
-
-=back
-
-=head3 output
-
-=over 4
-
-=item * Eulerian::Status instance. On success a new entry 'url' is inserted into the status.
-
-=back
-
-=head2 error : 
-
-I<Return a new Eulerian::Status error>
-
-This method is used internally and so shouldn't be used directly.
-
-=head3 input
-
-=over 4
-
-=item * code - Error code.
-
-=item * message - Error message.
-
-=back
-
-=head3 output
-
-=over 4
-
-=item * Eulerian::Status instance.
-
-=back
-
-=head2 success : 
-
-I<Return a new Eulerian::Status success>
-
-This method is used internally and so shouldn't be used directly.
-
-=head3 input
-
-=over 4
-
-=item * kind - Token kind.
-
-=item * json - Json reply message.
-
-=back
-
-=head3 output
-
-=over 4
-
-=item * Eulerian::Status instance containing an entry 'bearer'. 
-
-=back
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 
 =cut
-
-
-

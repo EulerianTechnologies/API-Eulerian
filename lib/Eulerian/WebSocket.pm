@@ -67,7 +67,7 @@ sub new
 #
 # @return Socket.
 #
-sub socket
+sub _socket
 {
   return shift->{ _SOCKET };
 }
@@ -101,7 +101,7 @@ sub port
 #
 # @return Writen Size.
 #
-sub on_write
+sub _on_write
 {
   my ( $peer, $buf ) = @_;
   $peer->{ _WS }->{ _SOCKET }->syswrite( $buf );
@@ -113,7 +113,7 @@ sub on_write
 #
 # @return
 #
-sub on_read
+sub _on_read
 {
   my ( $peer, $buf ) = @_;
   my $ws = $peer->{ _WS };
@@ -126,7 +126,7 @@ sub on_read
 #
 # @return
 #
-sub on_error
+sub _on_error
 {
   my ( $self, $error ) = @_;
   print STDERR "Websocket error : $error\n";
@@ -138,7 +138,7 @@ sub on_error
 #
 # @return
 #
-sub on_connect
+sub _on_connect
 {
 }
 #
@@ -149,7 +149,7 @@ sub on_connect
 #
 # @return Pending events count.
 #
-sub pendings
+sub _pendings
 {
   my ( $socket, $rfds ) = @_;
   my @pendings;
@@ -179,7 +179,7 @@ sub join
 {
   my ( $self, $url, $hook ) = @_;
   my $status = Eulerian::Status->new();
-  my $socket = $self->socket();
+  my $socket = $self->_socket();
   my $bufsize = 252000;
   my $offset = 0;
   my $buf = '';
@@ -191,10 +191,10 @@ sub join
   $peer = Protocol::WebSocket::Client->new( url => $url );
 
   # Setup Websocket hooks
-  $peer->on( write   => \&Eulerian::WebSocket::on_write );
-  $peer->on( read    => \&Eulerian::WebSocket::on_read );
-  $peer->on( error   => \&Eulerian::WebSocket::on_error );
-  $peer->on( connect => \&Eulerian::WebSocket::on_connect );
+  $peer->on( write   => \&Eulerian::WebSocket::_on_write );
+  $peer->on( read    => \&Eulerian::WebSocket::_on_read );
+  $peer->on( error   => \&Eulerian::WebSocket::_on_error );
+  $peer->on( connect => \&Eulerian::WebSocket::_on_connect );
 
   # Save back refs
   $self->{ _HOOK } = $hook;
@@ -285,5 +285,37 @@ I<Join Websocket, read message and call matching callback hook>
 =item * Eulerian::Status.
 
 =back
+
+=head1 SEE ALSO
+
+L<IO::Socket::INET>
+
+L<IO::Select>
+
+L<Protocol::WebSocket::Client>
+
+L<Eulerian::Status>
+
+=head1 AUTHOR
+
+Xavier Thorillon <x.thorillon@eulerian.com>
+
+=head1 COPYRIGHT
+
+Copyright (c) 2008 Eulerian Technologies Ltd L<http://www.eulerian.com>
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 
 =cut

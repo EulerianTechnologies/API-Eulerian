@@ -119,6 +119,37 @@ sub json
   return $data;
 }
 #
+# @brief Do HTTP Get on given URL.
+#
+# @param $class - Eulerian::HTTP class.
+# @param $url - Remote URL.
+# @param $headers - HTTP::Headers.
+# @param $file - Local file path.
+#
+# @return Eulerian::Status instance.
+#
+sub get
+{
+  my ( $class, $url, $headers, $file ) = @_;
+  return $class->_request( 'GET', $url, $headers, undef, undef, $file );
+}
+#
+# @brief Do HTTP Post on given URL.
+#
+# @param $class - Eulerian::HTTP class.
+# @param $url - Remote URL.
+# @param $headers - HTTP::Headers.
+# @param $what - Request Data.
+# @param $type - Request Data Type.
+#
+# @return Eulerian::Status instance.
+#
+sub post
+{
+  my ( $class, $url, $headers, $what, $type ) = @_;
+  return $class->_request( 'POST', $url, $headers, $what, $type );
+}
+#
 # @brief Send HTTP request on given url.
 #
 # @param $class - Eulerian Request class.
@@ -131,7 +162,7 @@ sub json
 #
 # @return Eulerian::Status instance.
 #
-sub request
+sub _request
 {
   my ( $class, $method, $url, $headers, $what, $type, $file ) = @_;
   my $status = Eulerian::Status->new();
@@ -189,37 +220,6 @@ sub request
   return $status;
 }
 #
-# @brief Do HTTP Get on given URL.
-#
-# @param $class - Eulerian::HTTP class.
-# @param $url - Remote URL.
-# @param $headers - HTTP::Headers.
-# @param $file - Local file path.
-#
-# @return Eulerian::Status instance.
-#
-sub get
-{
-  my ( $class, $url, $headers, $file ) = @_;
-  return request( $class, 'GET', $url, $headers, undef, undef, $file );
-}
-#
-# @brief Do HTTP Post on given URL.
-#
-# @param $class - Eulerian::HTTP class.
-# @param $url - Remote URL.
-# @param $headers - HTTP::Headers.
-# @param $what - Request Data.
-# @param $type - Request Data Type.
-#
-# @return Eulerian::Status instance.
-#
-sub post
-{
-  my ( $class, $url, $headers, $what, $type ) = @_;
-  return request( $class, 'POST', $url, $headers, $what, $type );
-}
-#
 # End up module properly
 #
 1;
@@ -237,6 +237,56 @@ Eulerian::Request - Eulerian Request module.
 This module is used to send HTTP request to remote Peer.
 
 =head1 METHODS
+
+=head2 get :
+
+I<Send HTTP GET request on given url>
+
+=head3 input
+
+=over 4
+
+=item * url : Remote url.
+
+=item * headers : HTTP headers.
+
+=item * file : [optional] Local file path used to store HTTP reply.
+
+=back
+
+=head3 output
+
+=over 4
+
+=item * Eulerian::Status. On success a new entry named 'response' is inserted into the status.
+
+=back
+
+=head2 post :
+
+I<Send HTTP POST request on given url>
+
+=head3 input
+
+=over 4
+
+=item * url : Remote url.
+
+=item * headers : HTTP headers.
+
+=item * what : Content of POST request.
+
+=item * type : Content type of POST request.
+
+=back
+
+=head3 output
+
+=over 4
+
+=item * Eulerian::Status. On success a new entry named 'response' is inserted into the status.
+
+=back
 
 =head2 headers :
 
@@ -292,85 +342,44 @@ I<Get JSON message from HTTP response>
 
 =back
 
-=head2 request :
+=head1 SEE ALSO
 
-I<Send HTTP request on given url.>
+L<Eulerian::Status>
 
-=head3 input
+L<HTTP::Headers>
 
-=over 4
+L<HTTP::Request>
 
-=item * method : HTTP method. ( ie: POST, GET ).
+L<HTTP::Status>
 
-=item * url : Remote url.
+L<LWP::UserAgent>
 
-=item * headers : HTTP headers.
+L<IO::Socket::SSL>
 
-=item * what : Content of POST request.
+L<JSON>
 
-=item * type : Content type of POST request.
+L<Encode>
 
-=item * file : Local file path used to store HTTP reply.
+=head1 AUTHOR
 
-=back
+Xavier Thorillon <x.thorillon@eulerian.com>
 
-=head3 output
+=head1 COPYRIGHT
 
-=over 4
+Copyright (c) 2008 Eulerian Technologies Ltd L<http://www.eulerian.com>
 
-=item * Eulerian::Status. On success a new entry named 'response' is inserted into the status.
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
 
-=back
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-=head2 get :
-
-I<Send HTTP GET request on given url>
-
-=head3 input
-
-=over 4
-
-=item * url : Remote url.
-
-=item * headers : HTTP headers.
-
-=item * file : Local file path used to store HTTP reply.
-
-=back
-
-=head3 output
-
-=over 4
-
-=item * Eulerian::Status. On success a new entry named 'response' is inserted into the status.
-
-=back
-
-=head2 post :
-
-I<Send HTTP POST request on given url>
-
-=head3 input
-
-=over 4
-
-=item * url : Remote url.
-
-=item * headers : HTTP headers.
-
-=item * what : Content of POST request.
-
-=item * type : Content type of POST request.
-
-=back
-
-=head3 output
-
-=over 4
-
-=item * Eulerian::Status. On success a new entry named 'response' is inserted into the status.
-
-=back
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 
 =cut
-
