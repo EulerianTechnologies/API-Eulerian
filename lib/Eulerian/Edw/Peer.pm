@@ -226,10 +226,6 @@ sub setup
   $self->ip( $setup->{ ip } ) if exists( $setup->{ ip } );
   $self->host( $setup->{ host } ) if exists( $setup->{ host } );
   $self->ports( $setup->{ ports } ) if exists( $setup->{ ports } );
-
-  # Check setup validity
-  # ip && grid && token are mandatories
-
   $self->dump();
 
 }
@@ -284,7 +280,6 @@ sub bearer
       );
     # Cache bearer value for next use
     $self->{ _BEARER } = $status->{ bearer } if ! $status->error();
-    print "Peer.bearer() : " . Dumper( $status ) . "\n";
   } else {
     # Return Cached bearer value
     $status = Eulerian::Status->new();

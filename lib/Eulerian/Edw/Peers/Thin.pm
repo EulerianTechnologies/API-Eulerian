@@ -59,7 +59,7 @@ sub new
   $self->host( 'edwaro' );
 
   # Setup Default ports value
-  $self->ports( [ 8080, 447 ] );
+  $self->ports( [ 8080, 8080 ] );
 
   # Setup Rest Peer Attributes
   $self->setup( $setup );
@@ -135,9 +135,6 @@ sub create
 
   # Get Valid Headers
   $status = $self->headers();
-
-  print "Thin.create() : " . Dumper( $status ) . "\n";
-
   if( ! $status->error() ) {
     # Post new JOB to Eulerian Data Warehouse Platform
     $status = Eulerian::Request->post(

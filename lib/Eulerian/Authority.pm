@@ -171,12 +171,9 @@ sub error
 {
   my ( $class, $code, $message ) = @_;
   my $status = Eulerian::Status->new();
-  my $error = "Request on Eulerian Authority failed.\n";
-  $error .= 'Code     : ' . $code . "\n";
-  $error .= 'Message  : ' . $message . "\n";
   $status->error( 1 );
   $status->code( $code );
-  $status->msg( $error );
+  $status->msg( $message );
   return $status;
 }
 #
