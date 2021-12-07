@@ -238,7 +238,7 @@ This module is used to send HTTP request to remote Peer.
 
 =head1 METHODS
 
-=head2 get :
+=head2 get()
 
 I<Send HTTP GET request on given url>
 
@@ -262,7 +262,7 @@ I<Send HTTP GET request on given url>
 
 =back
 
-=head2 post :
+=head2 post()
 
 I<Send HTTP POST request on given url>
 
@@ -288,7 +288,7 @@ I<Send HTTP POST request on given url>
 
 =back
 
-=head2 headers :
+=head2 headers()
 
 I<Create a new HTTP::Headers instance>
 
@@ -300,7 +300,7 @@ I<Create a new HTTP::Headers instance>
 
 =back
 
-=head2 is_json :
+=head2 is_json()
 
 I<Test if given HTTP response content is a JSON format>
 
@@ -322,7 +322,7 @@ I<Test if given HTTP response content is a JSON format>
 
 =back
 
-=head2 json :
+=head2 json()
 
 I<Get JSON message from HTTP response>
 

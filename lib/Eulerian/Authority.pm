@@ -211,7 +211,7 @@ This module is used to get Eulerian Data Warehouse Access or Session token from 
 
 =head1 METHODS
 
-=head2 bearer :
+=head2 bearer()
 
 I<Get a valid bearer value usable in HTTP Header Authorization from Eulerian Authority services>
 

@@ -116,7 +116,7 @@ This module provide a Perl Status object used as return to function calls.
 
 =head1 METHODS
 
-=head2 new :
+=head2 new()
 
 I<Create a new Eulerian::Status instance.>
 
@@ -128,7 +128,7 @@ I<Create a new Eulerian::Status instance.>
 
 =back
 
-=head2 error :
+=head2 error()
 
 I<Get/Set error flag.>
 
@@ -148,7 +148,7 @@ I<Get/Set error flag.>
 
 =back
 
-=head2 msg :
+=head2 msg()
 
 I<Get/Set status message.>
 
@@ -168,7 +168,7 @@ I<Get/Set status message.>
 
 =back
 
-=head2 code :
+=head2 code()
 
 I<Get/Set status code.>
 
@@ -188,7 +188,7 @@ I<Get/Set status code.>
 
 =back
 
-=head2 dump :
+=head2 dump()
 
 I<Dump status>
 

@@ -169,11 +169,13 @@ sub _pendings
   return scalar( @pendings );
 }
 #
-# @brief
+# @brief Join given url in Websocket mode, call hook for each received buffer.
 #
-# @param $self
-# @param $url
-# @param $hooks
+# @param $self - Eulerian::WebSocket instance.
+# @param $url - Remote url.
+# @param $hooks - User specific hook callback.
+#
+# @return Eulerian::Status instance.
 #
 sub join
 {
@@ -242,7 +244,7 @@ This module is used to read WebSocket message from remote host.
 
 =head1 METHODS
 
-=head2 new :
+=head2 new()
 
 I<Create a new instance of Eulerian Websocket>
 
@@ -264,7 +266,7 @@ I<Create a new instance of Eulerian Websocket>
 
 =back
 
-=head2 join :
+=head2 join()
 
 I<Join Websocket, read message and call matching callback hook>
 

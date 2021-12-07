@@ -51,7 +51,7 @@ sub setup
   my ( $self, $setup ) = @_;
 }
 #
-# @brief
+# @brief Start a new Analysis.
 #
 # @param $self - Eulerian Data Warehouse Peer Hooks.
 # @param $uuid - UUID of Eulerian Analytics Analysis.
@@ -76,7 +76,7 @@ string_end
       $string .= "        $column->[ 0 ] : $column->[ 1 ],\n";
     } else {
       # Thin Peer doesnt return columns types
-      $string .= "        $column : UNKNOWN,\n";
+      $string .= "               UNKNOWN : $column,\n";
     }
   }
   $string .= "      },\n  }\n";
@@ -84,7 +84,7 @@ string_end
 
 }
 #
-# @brief
+# @brief Analysis reply rows on Row outputs analysis.
 #
 # @param $self - Eulerian Data Warehouse Peer Hooks.
 # @param $uuid - UUID of Eulerian Analytics Analysis.
@@ -105,7 +105,7 @@ sub on_add
 
 }
 #
-# @brief
+# @brief Analysis reply rows on Distinct/Pivot analysis.
 #
 # @param $self - Eulerian Data Warehouse Peer Hooks.
 # @param $uuid - UUID of Eulerian Analytics Analysis.
@@ -126,7 +126,7 @@ sub on_replace
 
 }
 #
-# @brief
+# @brief Analysis progression callback.
 #
 # @param $self - Eulerian Data Warehouse Peer Hooks.
 # @param $uuid - UUID of Eulerian Analytics Analysis.
@@ -138,7 +138,7 @@ sub on_progress
   print( "PROGRESSION : $progress\n" );
 }
 #
-# @brief
+# @brief End of Eulerian Data Warehouse Analysis.
 #
 # @param $self - Eulerian Data Warehouse Peer Hooks.
 # @param $uuid - UUID of Eulerian Analytics Analysis.

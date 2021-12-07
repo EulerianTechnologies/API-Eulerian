@@ -336,3 +336,253 @@ sub cancel
 # Endup module properly
 #
 1;
+
+__END__
+
+=pod
+
+=head1  NAME
+
+Eulerian::Edw::Peer - Eulerian Data Warehouse Peer module.
+
+=head1 DESCRIPTION
+
+This module is the base interface of an Eulerian Data Warehouse Peer.
+
+=head1 METHODS
+
+=head2 new()
+
+I<Allocate and initialize a new Eulerian::Edw::Peer instance.>
+
+=head3 input
+
+=over 4
+
+=item * setup - Hash Perl of initialization parameters
+
+o class : Eulerian Data Warehouse Peer class name.
+
+o kind : Eulerian Authority token kind.
+
+o platform : Eulerian Authority platform.
+
+o hooks : Eulerian::Edw::Hooks instance.
+
+o token : Eulerian customer token.
+
+o grid : Eulerian customer Grid.
+
+o ip : Eulerian customer IP.
+
+=back
+
+=head3 output
+
+=over 4
+
+=item * Instance of an Eulerian::Edw::Peer.
+
+=back
+
+=head2 create()
+
+I<Create a new Eulerian Data Warehouse Peer instance.>
+
+=head3 input
+
+=over 4
+
+=item * name - Eulerian Data Warehouse Peer class name.
+
+=back
+
+=head3 output
+
+=over 4
+
+=item * Eulerian Data Warehouse Peer instance.
+
+=back
+
+=head2 class()
+
+I<Get Eulerian Data Warehouse Peer class name.>
+
+=head3 output
+
+=over 4
+
+=item * Eulerian Data Warehouse Peer class name.
+
+=back
+
+=head2 kind()
+
+I<Get/Set Eulerian Authority token kind.>
+
+=head3 input
+
+=over 4
+
+=item * kind - Eulerian Authority token kind
+
+=back
+
+=head3 output
+
+=over 4
+
+=item * Eulerian Authority token kind.
+
+=back
+
+=head2 platform()
+
+I<Get/Set Eulerian Authority platform.>
+
+=head3 input
+
+=over 4
+
+=item * kind - Eulerian Authority platform.
+
+=back
+
+=head3 output
+
+=over 4
+
+=item * Eulerian Authority platform.
+
+=back
+
+=head2 hooks()
+
+I<Get/Set Eulerian Data Warehouse Peer Hooks.>
+
+=head3 input
+
+=over 4
+
+=item * kind - Eulerian Data Warehouse Peer Hooks.
+
+=back
+
+=head3 output
+
+=over 4
+
+=item * Eulerian Data Warehouse Peer Hooks.
+
+=back
+
+=head2 grid()
+
+I<Get/Set Eulerian Custormer Grid.>
+
+=head3 input
+
+=over 4
+
+=item * kind - Eulerian Customer Grid.
+
+=back
+
+=head3 output
+
+=over 4
+
+=item * Eulerian Custormer Grid.
+
+=back
+
+=head2 ip()
+
+I<Get/Set Eulerian Customer IP.>
+
+=head3 input
+
+=over 4
+
+=item * kind - Eulerian Customer IP.
+
+=back
+
+=head3 output
+
+=over 4
+
+=item * Eulerian Customer IP.
+
+=back
+
+=head2 token()
+
+I<Get/Set Eulerian Customer token.>
+
+=head3 input
+
+=over 4
+
+=item * kind - Eulerian Customer token.
+
+=back
+
+=head3 output
+
+=over 4
+
+=item * Eulerian Customer token.
+
+=back
+
+=head2 setup()
+
+I<Setup Eulerian Data Warehouse Peer.>
+
+=head3 input
+
+=over 4
+
+=item * setup - Perl Hash of peer parameters.
+
+o class : Eulerian Data Warehouse Peer class name.
+
+o kind : Eulerian Authority token kind.
+
+o platform : Eulerian Authority platform.
+
+o hooks : Eulerian::Edw::Hooks instance.
+
+o token : Eulerian customer token.
+
+o grid : Eulerian customer Grid.
+
+o ip : Eulerian customer IP.
+
+=back
+
+=head1 AUTHOR
+
+Xavier Thorillon <x.thorillon@eulerian.com>
+
+=head1 COPYRIGHT
+
+Copyright (c) 2008 Eulerian Technologies Ltd L<http://www.eulerian.com>
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
+
+=cut

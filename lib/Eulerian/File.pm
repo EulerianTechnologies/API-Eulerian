@@ -85,7 +85,9 @@ This module is used to manage local file system.
 
 =head1 METHODS
 
-=head2 read : Read the content of a given file path.
+=head2 read()
+
+I<Read the content of a given file path.>
 
 =head3 input
 
@@ -99,11 +101,14 @@ This module is used to manage local file system.
 
 =over 4
 
-=item * Instance of an Eulerian::Status. On success, a new entry named 'data' is inserted into the Status.
+=item * Instance of an Eulerian::Status. On success, a new entry named 'data' is inserted into
+the Status.
 
 =back
 
-=head2 writable : Test if a given path is writable.
+=head2 writable()
+
+I<Test if a given path is writable.>
 
 =head3 input
 
