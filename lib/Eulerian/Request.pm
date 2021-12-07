@@ -21,6 +21,10 @@ package Eulerian::Request;
 #
 use strict; use warnings;
 #
+# Import Eulerian::Status
+#
+use Eulerian::Status;
+#
 # Import HTTP::Headers
 #
 use HTTP::Headers;
@@ -125,9 +129,12 @@ sub json
 # @param $type - Data type of POST request
 # @param $file - Local file path used to store HTTP reply.
 #
+# @return Eulerian::Status instance.
+#
 sub request
 {
   my ( $class, $method, $url, $headers, $what, $type, $file ) = @_;
+  my $status = Eulerian::Status->new();
   my $endpoint;
   my $request;
 
@@ -137,7 +144,10 @@ sub request
   # Sanity check POST arguments
   if( $method eq 'POST' ) {
     if( ! ( defined( $what ) && defined( $type ) ) ) {
-      return undef;
+      $status->error( 1 );
+      $status->msg( "Mandatory argument to post request is/are missing" );
+      $status->code( 400 );
+      return $status;
     } else {
       # Setup Content_Length and Content_Type
       $headers->push_header( Content_Length => length( $what ) );
@@ -162,7 +172,21 @@ sub request
 
   # Send Request, wait response if file is defined reply content is
   # writen into local file.
-  return $endpoint->request( $request, $file );
+  my $response = $endpoint->request( $request, $file );
+  my $json = Eulerian::Request->json( $response );
+
+  if( $response->code != HTTP_OK ) {
+    $status->error( 1 );
+    $status->code( $response->code );
+    $status->msg(
+      defined( $json ) ?
+        encode_json( $json ) : $response->content()
+      );
+  } else {
+    $status->{ response } = $response;
+  }
+
+  return $status;
 }
 #
 # @brief Do HTTP Get on given URL.
@@ -172,7 +196,7 @@ sub request
 # @param $headers - HTTP::Headers.
 # @param $file - Local file path.
 #
-# @return Array( HTTP::Status, Response data )
+# @return Eulerian::Status instance.
 #
 sub get
 {
@@ -188,44 +212,12 @@ sub get
 # @param $what - Request Data.
 # @param $type - Request Data Type.
 #
-# @return Array( HTTP::Status, Response data )
+# @return Eulerian::Status instance.
 #
 sub post
 {
   my ( $class, $url, $headers, $what, $type ) = @_;
   return request( $class, 'POST', $url, $headers, $what, $type );
-}
-#
-# @brief Decode HTTP response, create Reply context.
-#
-# @param $class - Eulerian Request class.
-# @param $response - HTTP response.
-#
-# @return Reply context.
-#
-#use Data::Dumper;
-sub reply
-{
-  my ( $class, $response ) = @_;
-  my $code = $response->code;
-  my $json;
-  my %rc;
-
-  #print Dumper( $response );
-
-  if( $code != HTTP_OK ) {
-    $rc{ error } = 1;
-    $rc{ error_code } = $code;
-    $json = $class->json( $response );
-    $rc{ error_msg } = defined( $json ) ?
-      encode_json( $json ) :
-      $response->content();
-  } else {
-    $rc{ error } = 0;
-    $rc{ response } = $response;
-  }
-
-  return \%rc;
 }
 #
 # End up module properly

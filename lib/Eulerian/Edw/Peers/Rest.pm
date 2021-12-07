@@ -36,6 +36,10 @@ use Eulerian::Authority;
 #
 use Eulerian::File;
 #
+# Import Eulerian::Status
+#
+use Eulerian::Status;
+#
 # Import Eulerian::Edw::Parsers::Json
 #
 use Eulerian::Edw::Parsers::Json;
@@ -240,15 +244,17 @@ sub body
 sub headers
 {
   my $self = shift;
-  my $rc = $self->SUPER::headers();
+  my $status = $self->SUPER::headers();
   my $headers;
 
-  $headers = $rc->{ headers } if ! $rc->{ error };
-  $headers->push_header( 'Content-Type', 'application/json' );
-  $headers->push_header( 'Accept', $self->accept() );
-  $headers->push_header( 'Accept-Encoding', $self->encoding() );
+  if( ! $status->error() ) {
+    $headers = $status->{ headers };
+    $headers->push_header( 'Content-Type', 'application/json' );
+    $headers->push_header( 'Accept', $self->accept() );
+    $headers->push_header( 'Accept-Encoding', $self->encoding() );
+  }
 
-  return $rc;
+  return $status;
 }
 #
 # @brief Create a new JOB on Eulerian Data Warehouse Rest Platform.
@@ -263,22 +269,27 @@ sub create
 {
   my ( $self, $command ) = @_;
   my $response;
-  my $rc;
+  my $status;
 
-  $rc = $self->headers();
-  if( ! $rc->{ error } ) {
+  # Create headers
+  $status = $self->headers();
+  if( ! $status->error() ) {
     my $url = $self->url() . '/edw/jobs';
-    $response = Eulerian::Request->post(
-      $url, $rc->{ headers }, $self->body( $command )
+
+    # Post Job create request to remote host
+    $status = Eulerian::Request->post(
+      $url, $status->{ headers }, $self->body( $command )
       );
-    $rc = Eulerian::Request->reply( $response );
-    if( ! $rc->{ error } ) {
-      my $json = Eulerian::Request->json( $response );
-      $self->uuid( $json->{ data }->[ 0 ] );
+    if( ! $status->error() ) {
+      $self->uuid(
+        Eulerian::Request->json(
+          $status->{ response }
+        )->{ data }->[ 0 ]
+      );
     }
   }
 
-  return $rc;
+  return $status;
 }
 #
 # @brief Get Eulerian Data Warehouse Job Status.
@@ -290,20 +301,19 @@ sub create
 #
 sub status
 {
-  my ( $self, $rc ) = @_;
-  my $response = $rc->{ response };
+  my ( $self, $status ) = @_;
+  my $response = $status->{ response };
   my $url = Eulerian::Request->json(
     $response )->{ data }->[ 1 ];
 
-  $rc = $self->headers();
-  if( ! $rc->{ error } ) {
-    $response = Eulerian::Request->get(
-      $url, $rc->{ headers }
+  $status = $self->headers();
+  if( ! $status->error() ) {
+    $status = Eulerian::Request->get(
+      $url, $status->{ headers }
       );
-    $rc = Eulerian::Request->reply( $response );
   }
 
-  return $rc;
+  return $status;
 }
 #
 # @brief Test if Job status is 'Running';
@@ -316,9 +326,9 @@ sub status
 #
 sub running
 {
-  my ( $self, $rc ) = @_;
+  my ( $self, $status ) = @_;
   return Eulerian::Request->json(
-    $rc->{ response }
+    $status->{ response }
     )->{ status } eq 'Running';
 }
 #
@@ -332,10 +342,10 @@ sub running
 #
 sub done
 {
-  my ( $self, $rc ) = @_;
-  return ! $rc->{ error } ?
+  my ( $self, $status ) = @_;
+  return ! $status->{ error } ?
     Eulerian::Request->json(
-      $rc->{ response }
+      $status->{ response }
       )->{ status } eq 'Done' :
       0;
 }
@@ -352,39 +362,31 @@ sub path
   my $encoding = $self->encoding();
   my $json = Eulerian::Request->json( $response );
   my $pattern = '([0-9]*)\.(json|csv|parquet)';
+  my $status = Eulerian::Status->new();
   my $url = $json->{ data }->[ 1 ];
   my $wdir = $self->wdir();
   my %rc = ();
 
   if( ! $wdir ) {
-    %rc = (
-      error => 1,
-      error_code => 400,
-      error_msg => "Working directory isn't set"
-      );
+    $status->error( 1 );
+    $status->code( 400 );
+    $status->msg( "Working directory isn't set" );
   } elsif( ! Eulerian::File->writable( $wdir ) ) {
-    %rc = (
-      error => 1,
-      error_code => 401,
-      error_msg => "Working directory isn't writable"
-      );
+    $status->error( 1 );
+    $status->code( 400 );
+    $status->msg( "Working directory isn't writable" );
   } elsif( ! ( $url =~ m/$pattern/ ) ) {
-    %rc = (
-      error => 1,
-      error_code => 400,
-      error_msg => 'Unknown local file name',
-      );
+    $status->error( 1 );
+    $status->code( 400 );
+    $status->msg( "Unknown local file name" );
   } else {
     my $path = $wdir. '/' . "$1.$2";
     $path .= '.gz' if $encoding eq 'gzip';
-    %rc = (
-      error => 0,
-      url => $url,
-      path => $path,
-    );
+    $status->{ url } = $url;
+    $status->{ path } = $path;
   }
 
-  return \%rc;
+  return $status;
 }
 #
 # @brief Unzip given file.
@@ -426,37 +428,36 @@ sub unzip
 #
 sub download
 {
-  my ( $self, $rc ) = @_;
+  my ( $self, $status ) = @_;
 
   # From Last status message compute local file path
-  $rc = $self->path( $rc->{ response } );
+  $status = $self->path( $status->{ response } );
 
   # If no error
-  if( ! $rc->{ error } ) {
-    my $path = $rc->{ path };
-    my $url = $rc->{ url };
+  if( ! $status->{ error } ) {
+    my $path = $status->{ path };
+    my $url = $status->{ url };
     my $response;
 
     # Get HTTP request headers
-    $rc = $self->headers();
+    $status = $self->headers();
 
-    if( ! $rc->{ error } ) {
+    if( ! $status->{ error } ) {
       # Send Download request to remote host, reply is
       # writen into $path file
-      $response = Eulerian::Request->get(
-        $url, $rc->{ headers }, $path
+      $status = Eulerian::Request->get(
+        $url, $status->{ headers }, $path
         );
-      $rc = Eulerian::Request->reply( $response );
       # Handle errors
-      if( ! $rc->{ error } ) {
-        $rc->{ path } = $self->encoding() eq 'gzip' ?
+      if( ! $status->error() ) {
+        $status->{ path } = $self->encoding() eq 'gzip' ?
           $self->unzip( $path ) : $path;
       }
     }
 
   }
 
-  return $rc;
+  return $status;
 }
 #
 # @brief Parse local file path and invoke hooks handlers.
@@ -469,8 +470,8 @@ sub download
 sub parse
 {
   my $pattern = '[0-9]*\.(json|csv|parquet)';
-  my ( $self, $rc ) = @_;
-  my $path = $rc->{ path };
+  my ( $self, $status ) = @_;
+  my $path = $status->{ path };
   my $parser;
   my $name;
   my %rc;
@@ -483,33 +484,23 @@ sub parse
       if( ( $parser = $name->new( $path, $self->uuid() ) ) ) {
         # Parse reply file raise callback hooks
         $parser->do( $self->hooks() );
-        # Return success
-        %rc = ( error => 0 );
       } else {
-        %rc = (
-          error => 1,
-          error_msg => 'Failed to create Parser',
-          error_code => 401,
-        );
+        $status->error( 1 );
+        $status->msg( "Failed to create Parser" );
+        $status->code( 401 );
       }
     } else {
-      # Unknown file type
-      %rc = (
-        error => 1,
-        error_msg => 'Not yet implemented file format',
-        error_code => 501,
-      );
+      $status->error( 1 );
+      $status->msg( "Unknown Parser" );
+      $status->code( 501 );
     }
   } else {
-    # Unparsable file name
-    %rc = (
-      error => 1,
-      error_msg => 'Unknown file format',
-      error_code => 401,
-    );
+    $status->error( 1 );
+    $status->msg( "Unknown file format" );
+    $status->code( 401 );
   }
 
-  return \%rc;
+  return $status;
 }
 #
 # @brief Do Request on Eulerian Data Warehouse Platform.
@@ -521,27 +512,27 @@ sub request
 {
   my ( $self, $command ) = @_;
   my $response;
+  my $status;
   my $json;
-  my $rc;
 
   # Create Job on Eulerian Data Warehouse Platform
-  $rc = $self->create( $command );
+  $status = $self->create( $command );
 
   # Wait end of Job
-  while( ! $rc->{ error } && $self->running( $rc ) ) {
-    $rc = $self->status( $rc );
+  while( ! $status->error() && $self->running( $status ) ) {
+    $status = $self->status( $status );
   }
 
   # If Done, download reply file
-  if( $self->done( $rc ) ) {
-    $rc = $self->download( $rc );
-    if( ! $rc->{ error } ) {
+  if( ! $status->error() && $self->done( $status ) ) {
+    $status = $self->download( $status );
+    if( ! $status->error() ) {
       # Parse reply file, call hooks
-      $rc = $self->parse( $rc );
+      $status = $self->parse( $status );
     }
   }
 
-  return $rc;
+  return $status;
 }
 #
 # @brief Cancel Job on Eulerian Data Warehouse Platform.
@@ -552,32 +543,30 @@ sub request
 sub cancel
 {
   my ( $self ) = @_;
-  my $rc;
+  my $status;
 
   # Get HTTP request headers
-  $rc = $self->headers();
-  if( ! $rc->{ error } ) {
-    my $headers = $rc->{ headers };
+  $status = $self->headers();
+  if( ! $status->error() ) {
+    my $headers = $status->{ headers };
 
-    delete $rc->{ headers };
+    delete $status->{ headers };
     # Create cancel job url
     if( ! $self->uuid() ) {
-      $rc->{ error } = 1;
-      $rc->{ error_msg } = 'Failed to cancel Job. Unknown UUID';
-      $rc->{ error_code } = 404;
+      $status->error( 1 );
+      $status->msg( "Failed to cancel Job. Unknown UUID" );
+      $status->code( 404 );
     } else {
       my $url = $self->url() . '/edw/jobs/';
-      my $response;
 
       $url .= $self->uuid() . '/cancel';
       # Send Cancel request to remote host
-      $response = Eulerian::Request->get( $url, $headers );
-      $rc = Eulerian::Request->reply( $response );
+      $status = Eulerian::Request->get( $url, $headers );
 
     }
   }
 
-  return $rc;
+  return $status;
 }
 #
 # End Up module properly

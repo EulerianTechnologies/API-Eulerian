@@ -3,7 +3,7 @@
 #
 # @file File.pm
 #
-# @brief Module
+# @brief Eulerian::File module used to manage local file system.
 #
 # @author Thorillon Xavier:x.thorillon@eulerian.com
 #
@@ -21,20 +21,36 @@ package Eulerian::File;
 #
 use strict; use warnings;
 #
+# Import Eulerian::Status
+#
+use Eulerian::Status;
+#
 # @brief Read file content.
 #
 # @param path - File path.
 #
-# @return File content.
+# @return Eulerian::Status
 #
 sub read
 {
+  my $status = Eulerian::Status->new();
   my ( $class, $path ) = @_;
-  open my $FD, '<', $path
-    or die "Couldn't open file : $path. $!";
-  my $data = do { local $/; <$FD> };
-  close $FD;
-  return $data;
+  my $data;
+  my $fd;
+  # Open file for reading
+  open $fd, "<", $path or do {
+    $status->error( 1 );
+    $status->code( -1 );
+    $status->msg( "Opening file : $path for reading failed. $!" );
+    return $status;
+  };
+  # Read file content
+  $data = do { local $/; <$fd> };
+  # Close file
+  close $fd;
+  # Save content
+  $status->{ data } = $data;
+  return $status;
 }
 #
 # @brief Test if given path is writable.

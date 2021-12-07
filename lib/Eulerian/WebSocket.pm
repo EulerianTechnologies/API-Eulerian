@@ -3,7 +3,8 @@
 #
 # @file WebSocket.pm
 #
-# @brief Eulerian Request module used to
+# @brief Eulerian Request module used to read Websocket messages from remote
+#        peer
 #
 # @author Thorillon Xavier:x.thorillon@eulerian.com
 #
@@ -32,6 +33,10 @@ use Protocol::WebSocket::Client;
 # Import IO::Select
 #
 use IO::Select;
+#
+# Import Eulerian::Status
+#
+use Eulerian::Status;
 #
 # @brief Allocate and initialize a new Eulerian Websocket.
 #
@@ -173,20 +178,16 @@ sub pendings
 sub join
 {
   my ( $self, $url, $hook ) = @_;
+  my $status = Eulerian::Status->new();
   my $socket = $self->socket();
   my $bufsize = 252000;
-  #my $bufsize = 65535 * 4;
   my $offset = 0;
   my $buf = '';
   my $read;
   my $rfds;
   my $peer;
-  #my %params = (
-  #  max_payload_size => $bufsize
-  #);
 
   # Create a Websocket
-  #$peer = Protocol::WebSocket::Client->new( url => $url, %params );
   $peer = Protocol::WebSocket::Client->new( url => $url );
 
   # Setup Websocket hooks
@@ -220,6 +221,7 @@ sub join
   # Disconnect from remote host
   $peer->disconnect;
 
+  return $status;
 }
 #
 # End up module properly

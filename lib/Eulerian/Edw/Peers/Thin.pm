@@ -131,27 +131,30 @@ sub create
 {
   my ( $self, $command ) = @_;
   my $response;
-  my $rc;
+  my $status;
 
   # Get Valid Headers
-  $rc = $self->headers();
-  if( ! $rc->{ error } ) {
-    # Post new JOB to Eulerian Data Warehouse Platform
-    $response = Eulerian::Request->post(
-      $self->url(), $rc->{ headers }, $command, 'text/plain'
-      );
-    # Decode reply, setup reply context
-    $rc = Eulerian::Request->reply( $response );
-    my $json = Eulerian::Request->json( $response );
-    if( defined( $json ) && $json->{ status }->[ 1 ] != 0 ) {
-      $rc->{ error } = 1;
-      $rc->{ error_msg } = $json->{ status }->[ 0 ];
-      $rc->{ error_code } = $json->{ status }->[ 1 ];
-    }
+  $status = $self->headers();
 
+  print "Thin.create() : " . Dumper( $status ) . "\n";
+
+  if( ! $status->error() ) {
+    # Post new JOB to Eulerian Data Warehouse Platform
+    $status = Eulerian::Request->post(
+      $self->url(), $status->{ headers }, $command, 'text/plain'
+      );
+    if( ! $status->error() ) {
+      my $json = Eulerian::Request->json( $status->{ response } );
+      if( defined( $json ) && $json->{ status }->[ 1 ] != 0 ) {
+        $status = Eulerian::Status->new();
+        $status->error( 1 );
+        $status->msg( $json->{ status }->[ 0 ] );
+        $status->code( $json->{ status }->[ 1 ] );
+      }
+    }
   }
 
-  return $rc;
+  return $status;
 }
 #
 # @brief Dispatch Eulerian Data Warehouse Analytics Analysis result messages to
@@ -212,8 +215,8 @@ sub dispatcher
 #
 sub join
 {
-  my ( $self, $rc ) = @_;
-  my $json = Eulerian::Request->json( $rc->{ response } );
+  my ( $self, $status ) = @_;
+  my $json = Eulerian::Request->json( $status->{ response } );
   my $ws = Eulerian::WebSocket->new(
     $self->host(), $self->ports()->[ $self->secure() ]
     );
@@ -231,18 +234,18 @@ sub request
 {
   my ( $self, $command ) = @_;
   my $response;
+  my $status;
   my $json;
-  my $rc;
 
   # Create Job on Eulerian Data Warehouse Platform
-  $rc = $self->create( $command );
+  $status = $self->create( $command );
 
-  if( ! $rc->{ error } ) {
+  if( ! $status->error() ) {
     # Join Websocket call user specific callback hooks
-    $rc = $self->join( $rc );
+    $status = $self->join( $status );
   }
 
-  return $rc;
+  return $status;
 }
 #
 # @brief Cancel Job on Eulerian Data Warehouse Platform.
@@ -253,27 +256,22 @@ sub request
 sub cancel
 {
   my ( $self ) = @_;
-  my $rc;
+  my $status;
 
   # Get Valid Headers
-  $rc = $self->headers();
-  if( ! $rc->{ error } && exists( $self->{ uuid } ) ) {
+  $status = $self->headers();
+  if( ! $status->error() && exists( $self->{ uuid } ) ) {
     my $uuid = $self->{ uuid };
     my $command = "KILL $uuid;";
-    my $response;
 
     # Post new JOB to Eulerian Data Warehouse Platform
-    $response = Eulerian::Request->post(
-      $self->url(), $rc->{ headers }, $command, 'text/plain'
+    $status = Eulerian::Request->post(
+      $self->url(), $status->{ headers }, $command, 'text/plain'
       );
-
-    #print Dumper( $response ) . "\n";
-    # Decode reply, setup reply context
-    $rc = Eulerian::Request->reply( $response );
 
   }
 
-  return $rc;
+  return $status;
 }
 #
 # End Up module properly

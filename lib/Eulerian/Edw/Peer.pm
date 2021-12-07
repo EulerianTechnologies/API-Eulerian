@@ -29,6 +29,10 @@ use Eulerian::Edw::Peers::Rest;
 #
 use Eulerian::Edw::Peers::Thin;
 #
+# Import Eulerian::Status
+#
+use Eulerian::Status;
+#
 # @brief Allocate a new Eulerian Data Warehouse Peer.
 #
 # @param $class - Eulerian Data Warehouse Peer Class.
@@ -226,9 +230,6 @@ sub setup
   # Check setup validity
   # ip && grid && token are mandatories
 
-
-
-
   $self->dump();
 
 }
@@ -267,32 +268,30 @@ sub dump
 #
 # @return Authorization Bearer.
 #
+use Data::Dumper;
 sub bearer
 {
   my $self = shift;
   my $bearer = $self->{ _BEARER };
-  my %hrc;
-  my $rc;
+  my $status;
 
   if( ! defined( $bearer ) ) {
     # Request Authority Services for a valid bearer
-    $rc = Eulerian::Authority->bearer(
+    $status = Eulerian::Authority->bearer(
       $self->kind(), $self->platform(),
       $self->grid(), $self->ip(),
       $self->token()
       );
     # Cache bearer value for next use
-    $self->{ _BEARER } = $rc->{ bearer } if ! $rc->{ error };
+    $self->{ _BEARER } = $status->{ bearer } if ! $status->error();
+    print "Peer.bearer() : " . Dumper( $status ) . "\n";
   } else {
     # Return Cached bearer value
-    %hrc = (
-      error => 0,
-      bearer => $bearer,
-    );
-    $rc = \%hrc;
+    $status = Eulerian::Status->new();
+    $status->{ bearer } = $bearer;
   }
 
-  return $rc;
+  return $status;
 }
 #
 #
@@ -305,21 +304,21 @@ sub bearer
 sub headers
 {
   my $self = shift;
-  my $rc = $self->bearer();
+  my $status = $self->bearer();
   my $headers;
 
-  if( ! $rc->{ error } ) {
+  if( ! $status->error() ) {
     # Create a new Object Headers
     $headers = Eulerian::Request->headers();
     # Setup Authorization Header value
-    $headers->push_header( 'Authorization', $rc->{ bearer } );
+    $headers->push_header( 'Authorization', $status->{ bearer } );
     # Setup reply context
-    $rc->{ headers } = $headers;
+    $status->{ headers } = $headers;
     # Remove bearer
-    delete $rc->{ bearer };
+    delete $status->{ bearer };
   }
 
-  return $rc;
+  return $status;
 }
 #
 # @brief

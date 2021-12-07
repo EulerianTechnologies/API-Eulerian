@@ -3,7 +3,7 @@
 #
 # @file Status.pm
 #
-# @brief Module
+# @brief Eulerian Status used to return function error to the callers
 #
 # @author Thorillon Xavier:x.thorillon@eulerian.com
 #
@@ -21,30 +21,29 @@ package Eulerian::Status;
 #
 use strict; use warnings;
 #
-# @brief
+# @brief Allocate and initialize a new Eulerian::Status instance.
 #
-# @param $class -
+# @param $class - Eulerian::Status class.
 #
-# @return
+# @return Eulerian::Status instance.
 #
 sub new
 {
   my ( $class ) = @_;
-  my $self = bless( {
+  return bless( {
       _ERROR => 0,
       _MSG => '',
       _CODE => 0,
     }, $class
   );
-  return $self;
 }
 #
-# @brief
+# @brief Get/Set error message.
 #
-# @param $self
-# @param $msg
+# @param $self - Eulerian::Status instance.
+# @param $msg - Error message.
 #
-# @return $msg
+# @return Error message.
 #
 sub msg
 {
@@ -53,12 +52,12 @@ sub msg
   return $self->{ _MSG };
 }
 #
-# @brief
+# @brief Get/Set error code.
 #
-# @param $self
-# @param $code
+# @param $self - Eulerian::Status instance.
+# @param $code - Error code.
 #
-# @return $code
+# @return Error code.
 #
 sub code
 {
@@ -67,12 +66,12 @@ sub code
   return $self->{ _CODE };
 }
 #
-# @brief
+# @brief Get/Set error.
 #
-# @param $self
-# @param $code
+# @param $self - Eulerian::Status instance.
+# @param $error - Error.
 #
-# @return $code
+# @return Error flag.
 #
 sub error
 {
@@ -81,9 +80,9 @@ sub error
   return $self->{ _ERROR };
 }
 #
-# @brief
+# @brief Dump status.
 #
-# @param $self
+# @param $self - Eulerian::Status.
 #
 sub dump
 {

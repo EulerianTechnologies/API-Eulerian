@@ -26,6 +26,10 @@ use strict; use warnings;
 #
 use Eulerian::Request;
 #
+# Import Eulerian::Status
+#
+use Eulerian::Status;
+#
 # URL domain matching platform names
 #
 my %DOMAINS = (
@@ -50,26 +54,24 @@ my %KINDS = (
 # @param $ip - IP of Eulerian Data Warehouse Peer.
 # @param $token - Eulerian Token.
 #
-# @return URL.
+# @return Eulerian::Status
 #
 sub url
 {
   my ( $class, $kind, $platform, $grid, $ip, $token ) = @_;
-  my $domain = $DOMAINS{ $platform };
-  my $url = undef;
-  my %rc;
+  my $domain;
   #
   # Sanity check mandatories arguments
   #
-  if( ! defined( $grid ) ) {
+  if( ! ( defined( $grid ) && length( $grid ) > 0 ) ) {
     return $class->error(
-      406, "Mandatory argument 'grid' is missing"
+      406, "Mandatory argument 'grid' is missing or invalid"
       );
-  } elsif( ! defined( $ip ) ) {
+  } elsif( ! ( defined( $ip ) && length( $ip ) > 0 ) ) {
     return $class->error(
       406, "Mandatory argument 'ip' is missing"
     );
-  } elsif( ! defined( $token ) ) {
+  } elsif( ! ( defined( $token ) && length( $token ) > 0 ) ) {
     return $class->error(
       406, "Mandatory argument 'token' is missing"
     );
@@ -94,17 +96,18 @@ sub url
   } elsif( ! ( $domain = $DOMAINS{ $platform } ) ) {
     return $class->error( 506, "Invalid platform : $platform" );
   } else {
+    my $status = Eulerian::Status->new();
+    my $url;
+
     $url  = 'https://';
     $url .= $grid . '.';
     $url .= $domain . '/ea/v2/';
     $url .= $token . $kind;
     $url .= $ip . '&output-as-kv=1';
-    %rc = (
-      error => 0,
-      url => $url,
-    );
+    $status->{ url } = $url;
+
+    return $status;
   }
-  return %rc;
 }
 #
 # @brief Get valid HTTP Authorization bearer used to access Eulerian
@@ -117,31 +120,35 @@ sub url
 # @param $ip - Peer IP.
 # @param $token - Eulerian Token.
 #
-# @return Bearer token.
+# @return Eulerian::Status
 #
+use Data::Dumper;
 sub bearer
 {
   my ( $class, $kind, $platform, $grid, $ip, $token ) = @_;
-  my $code = 400;
+  my $response;
+  my $status;
+  my $code;
   my $json;
-  my %rc;
 
   # Get URL used to request Eulerian Authority for Token.
-  %rc = $class->url( $kind, $platform, $grid, $ip, $token );
+  $status = $class->url( $kind, $platform, $grid, $ip, $token );
   # Handle errors
-  if( ! $rc{ error } ) {
+  if( ! $status->error() ) {
     # Request Eulerian Authority
-    my $response = Eulerian::Request->get( $rc{ url } );
+    $status = Eulerian::Request->get( $status->{ url } );
+    # Get HTTP response
+    $response = $status->{ response };
     # Get HTTP response code
     $code = $response->code;
     # We expect JSON reply data
     $json = Eulerian::Request->json( $response );
     if( $json && ( $code == 200 ) ) {
-      %rc = $json->{ error } ?
+      $status = $json->{ error } ?
         $class->error( $code, $json->{ error_msg } ) :
         $class->success( $kind, $json );
     } else {
-      %rc = $class->error(
+      $status = $class->error(
         $code, $json ?
           encode_json( $json ) :
           $response->decoded_content
@@ -149,7 +156,7 @@ sub bearer
     }
   }
 
-  return \%rc;
+  return $status;
 }
 #
 # @brief Return Error on Eulerian Authority Services.
@@ -158,19 +165,19 @@ sub bearer
 # @param $code - HTTP Error code.
 # @param $message - Error message.
 #
-# return Hash( error, error_code, error_msg )
+# return Eulerian::Status
 #
 sub error
 {
   my ( $class, $code, $message ) = @_;
+  my $status = Eulerian::Status->new();
   my $error = "Request on Eulerian Authority failed.\n";
   $error .= 'Code     : ' . $code . "\n";
   $error .= 'Message  : ' . $message . "\n";
-  return (
-    error => 1,
-    error_code => $code,
-    error_msg => $error
-    );
+  $status->error( 1 );
+  $status->code( $code );
+  $status->msg( $error );
+  return $status;
 }
 #
 # @brief Return Success on Eulerian Authority Services.
@@ -179,18 +186,15 @@ sub error
 # @param $kind - Token kind.
 # @param $json - Json reply.
 #
-# @return Hash( error, bearer )
+# @return Eulerian::Status
 #
 sub success
 {
   my ( $class, $kind, $json ) = @_;
-  my $data = $json->{ data };
-  my $rows = $data->{ rows };
-  my $row  = $rows->[ 0 ];
-  return (
-    error => 0,
-    bearer => 'bearer ' . $row->{ $kind . '_token' }
-    );
+  my $status = Eulerian::Status->new();
+  my $row = $json->{ data }->{ rows }->[ 0 ];
+  $status->{ bearer } = 'bearer ' . $row->{ $kind . '_token' };
+  return $status;
 }
 #
 # End up perl module properly
