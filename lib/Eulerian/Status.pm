@@ -101,3 +101,96 @@ string_end
 # End up perl module properly
 #
 1;
+
+__END__
+
+=pod
+
+=head1  NAME
+
+Eulerian::Status - Eulerian Status module.
+
+=head1 DESCRIPTION
+
+This module provide a Perl Status object used as return to function calls.
+
+=head1 METHODS
+
+=head2 new :
+
+I<Create a new Eulerian::Status instance.>
+
+=head3 output
+
+=over 4
+
+=item * Instance of an Eulerian::Status.
+
+=back
+
+=head2 error :
+
+I<Get/Set error flag.>
+
+=head3 input
+
+=over 4
+
+=item * [optional] Error flag.
+
+=back
+
+=head3 output
+
+=over 4
+
+=item * Error flag.
+
+=back
+
+=head2 msg :
+
+I<Get/Set status message.>
+
+=head3 input
+
+=over 4
+
+=item * [optional] Status message.
+
+=back
+
+=head3 output
+
+=over 4
+
+=item * Status message.
+
+=back
+
+=head2 code :
+
+I<Get/Set status code.>
+
+=head3 input
+
+=over 4
+
+=item * [optional] Status code.
+
+=back
+
+=head3 output
+
+=over 4
+
+=item * Status code.
+
+=back
+
+=head2 dump :
+
+I<Dump status>
+
+=cut
+

@@ -70,3 +70,58 @@ sub writable
 # End up perl module properly
 #
 1;
+
+__END__
+
+=pod
+
+=head1  NAME
+
+Eulerian::File - Eulerian File module.
+
+=head1 DESCRIPTION
+
+This module is used to manage local file system.
+
+=head1 METHODS
+
+=head2 read : Read the content of a given file path.
+
+=head3 input
+
+=over 4
+
+=item * File path
+
+=back
+
+=head3 output
+
+=over 4
+
+=item * Instance of an Eulerian::Status. On success, a new entry named 'data' is inserted into the Status.
+
+=back
+
+=head2 writable : Test if a given path is writable.
+
+=head3 input
+
+=over 4
+
+=item * File path
+
+=back
+
+=head3 output
+
+=over 4
+
+=item * 1 - Path is writable.
+
+=item * 0 - Path isnt writable.
+
+=back
+
+=cut
+

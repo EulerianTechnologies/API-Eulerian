@@ -223,3 +223,154 @@ sub post
 # End up module properly
 #
 1;
+
+__END__
+
+=pod
+
+=head1  NAME
+
+Eulerian::Request - Eulerian Request module.
+
+=head1 DESCRIPTION
+
+This module is used to send HTTP request to remote Peer.
+
+=head1 METHODS
+
+=head2 headers :
+
+I<Create a new HTTP::Headers instance>
+
+=head3 output
+
+=over 4
+
+=item * Instance of an HTTP::Headers.
+
+=back
+
+=head2 is_json :
+
+I<Test if given HTTP response content is a JSON format>
+
+=head3 input
+
+=over 4
+
+=item * HTTP response.
+
+=back
+
+=head3 output
+
+=over 4
+
+=item * 1 - HTTP response content is in JSON format.
+
+=item * 0 - HTTP response content isnt in JSON format.
+
+=back
+
+=head2 json :
+
+I<Get JSON message from HTTP response>
+
+=head3 input
+
+=over 4
+
+=item * HTTP response.
+
+=back
+
+=head3 output
+
+=over 4
+
+=item * JSON message.
+
+=back
+
+=head2 request :
+
+I<Send HTTP request on given url.>
+
+=head3 input
+
+=over 4
+
+=item * method : HTTP method. ( ie: POST, GET ).
+
+=item * url : Remote url.
+
+=item * headers : HTTP headers.
+
+=item * what : Content of POST request.
+
+=item * type : Content type of POST request.
+
+=item * file : Local file path used to store HTTP reply.
+
+=back
+
+=head3 output
+
+=over 4
+
+=item * Eulerian::Status. On success a new entry named 'response' is inserted into the status.
+
+=back
+
+=head2 get :
+
+I<Send HTTP GET request on given url>
+
+=head3 input
+
+=over 4
+
+=item * url : Remote url.
+
+=item * headers : HTTP headers.
+
+=item * file : Local file path used to store HTTP reply.
+
+=back
+
+=head3 output
+
+=over 4
+
+=item * Eulerian::Status. On success a new entry named 'response' is inserted into the status.
+
+=back
+
+=head2 post :
+
+I<Send HTTP POST request on given url>
+
+=head3 input
+
+=over 4
+
+=item * url : Remote url.
+
+=item * headers : HTTP headers.
+
+=item * what : Content of POST request.
+
+=item * type : Content type of POST request.
+
+=back
+
+=head3 output
+
+=over 4
+
+=item * Eulerian::Status. On success a new entry named 'response' is inserted into the status.
+
+=back
+
+=cut
+

@@ -227,3 +227,63 @@ sub join
 # End up module properly
 #
 1;
+
+__END__
+
+=pod
+
+=head1  NAME
+
+Eulerian::WebSocket - Eulerian WebSocket module.
+
+=head1 DESCRIPTION
+
+This module is used to read WebSocket message from remote host.
+
+=head1 METHODS
+
+=head2 new :
+
+I<Create a new instance of Eulerian Websocket>
+
+=head3 input
+
+=over 4
+
+=item * host - Remote host.
+
+=item * port - Remote port.
+
+=back
+
+=head3 output
+
+=over 4
+
+=item * Eulerian::Websocket instance.
+
+=back
+
+=head2 join :
+
+I<Join Websocket, read message and call matching callback hook>
+
+=head3 input
+
+=over 4
+
+=item * url - Remote URL.
+
+=item * hook - User specific hook function used to consume incoming message.
+
+=back
+
+=head3 output
+
+=over 4
+
+=item * Eulerian::Status.
+
+=back
+
+=cut

@@ -197,3 +197,128 @@ sub success
 # End up perl module properly
 #
 1;
+
+__END__
+
+=pod
+
+=head1  NAME
+
+Eulerian::Authority - Eulerian Authority module.
+
+=head1 DESCRIPTION
+
+This module is used to get Eulerian Data Warehouse Access or Session token from Eulerian Authority Services.
+
+=head1 METHODS
+
+=head2 bearer : 
+
+I<Get a valid bearer value usable in HTTP Header Authorization from Eulerian Authority services>
+
+=head3 input
+
+=over 4
+
+=item * kind - Token Kind ( session, access ).
+
+=item * platform - Eulerian Authority Services Platform ( fr, can ).
+
+=item * grid - Customer Grid.
+
+=item * ip - Customer IP.
+
+=item * token - Customer Token. 
+
+=back
+
+=head3 output
+
+=over 4
+
+=item * Eulerian::Status instance. On success a new entry 'bearer' is inserted into the status.
+
+=back
+
+=head2 url : 
+
+I<Create a valid URL to Eulerian Authority Services>. 
+
+This method is used internally and so shouldn't be used directly.
+
+=head3 input
+
+=over 4
+
+=item * kind - Token Kind ( session, access ).
+
+=item * platform - Eulerian Authority Services Platform ( fr, can ).
+
+=item * grid - Customer Grid.
+
+=item * ip - Customer IP.
+
+=item * token - Customer Token. 
+
+=back
+
+=head3 output
+
+=over 4
+
+=item * Eulerian::Status instance. On success a new entry 'url' is inserted into the status.
+
+=back
+
+=head2 error : 
+
+I<Return a new Eulerian::Status error>
+
+This method is used internally and so shouldn't be used directly.
+
+=head3 input
+
+=over 4
+
+=item * code - Error code.
+
+=item * message - Error message.
+
+=back
+
+=head3 output
+
+=over 4
+
+=item * Eulerian::Status instance.
+
+=back
+
+=head2 success : 
+
+I<Return a new Eulerian::Status success>
+
+This method is used internally and so shouldn't be used directly.
+
+=head3 input
+
+=over 4
+
+=item * kind - Token kind.
+
+=item * json - Json reply message.
+
+=back
+
+=head3 output
+
+=over 4
+
+=item * Eulerian::Status instance containing an entry 'bearer'. 
+
+=back
+
+=cut
+
+
+
