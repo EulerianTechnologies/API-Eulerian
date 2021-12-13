@@ -142,33 +142,6 @@ sub _on_connect
 {
 }
 #
-# @brief Get Count of Pending events
-#
-# @param $socket - Socket.
-# @param $rfds - Read Fds set.
-#
-# @return Pending events count.
-#
-sub _pendings
-{
-  my ( $socket, $rfds ) = @_;
-  my @pendings;
-
-  # Create Multiplexer on demand
-  $$rfds ||= new IO::Select();
-
-  # Monitor socket for IO events
-  $$rfds->add( $socket );
-
-  # Get pendings events
-  @pendings = $$rfds->can_read();
-
-  # Unmonitor socket for IO events
-  $$rfds->remove( $socket );
-
-  return scalar( @pendings );
-}
-#
 # @brief Join given url in Websocket mode, call hook for each received buffer.
 #
 # @param $self - Eulerian::WebSocket instance.

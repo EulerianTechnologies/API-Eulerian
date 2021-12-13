@@ -32,6 +32,10 @@ use parent 'Eulerian::Edw::Peer';
 #
 use Eulerian::WebSocket;
 #
+# Import Eulerian::Bench
+#
+use Eulerian::Bench;
+#
 # Import Switch
 #
 use Switch;
@@ -230,16 +234,22 @@ sub join
 sub request
 {
   my ( $self, $command ) = @_;
+  my $bench = new Eulerian::Bench();
   my $response;
   my $status;
   my $json;
 
   # Create Job on Eulerian Data Warehouse Platform
+  $bench->start();
   $status = $self->create( $command );
+  $bench->stage( 'create' );
 
   if( ! $status->error() ) {
     # Join Websocket call user specific callback hooks
+    $bench->start();
     $status = $self->join( $status );
+    $bench->stage( 'join' );
+    $status->{ bench } = $bench;
   }
 
   return $status;

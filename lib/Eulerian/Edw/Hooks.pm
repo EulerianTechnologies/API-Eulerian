@@ -213,8 +213,8 @@ Warehouse Distinct and Pivot outputs Analysis.>
 
 =head2 on_progress()
 
-I<Interface definition of the callback function used to control the progression of
-an Eulerian Data Warehouse Analysis.>
+I<Interface definition of the callback function used to control the progression
+of an Eulerian Data Warehouse Analysis.>
 
 =head3 input
 

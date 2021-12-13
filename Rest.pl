@@ -64,6 +64,8 @@ if( $status->error() ) {
   if( $status->error() ) {
     $status->dump();
   } else {
+    # Dump stages durations
+    $status->{ bench }->dump();
     # Cancel the command
     $peer->cancel();
   }

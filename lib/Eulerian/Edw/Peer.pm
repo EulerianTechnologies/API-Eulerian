@@ -262,10 +262,10 @@ sub dump
 #
 # @param $self - Eulerian Data Warehouse Peer.
 #
-# @return Authorization Bearer.
+# @return Eulerian::Status. On success a new entry 'bearer' is inserted into
+#         the Status.
 #
-use Data::Dumper;
-sub bearer
+sub _bearer
 {
   my $self = shift;
   my $bearer = $self->{ _BEARER };
@@ -289,17 +289,17 @@ sub bearer
   return $status;
 }
 #
-#
-# @brief Default HTTP Request Headers.
+# @brief Create HTTP Request Headers.
 #
 # @param $self - Eulerian Data Warehouse Peer.
 #
-# @return HTTP Headers.
+# @return Eulerian::Status. On success a new entry 'headers' is inserted into
+#         the status.
 #
 sub headers
 {
   my $self = shift;
-  my $status = $self->bearer();
+  my $status = $self->_bearer();
   my $headers;
 
   if( ! $status->error() ) {
@@ -316,21 +316,29 @@ sub headers
   return $status;
 }
 #
-# @brief
+# @brief Interface definition of the function used to request Eulerian Data
+#        Warehouse Platform.
 #
 # @param $self - Eulerian Data Warehouse Peer.
 # @param $command - Eulerian Data Warehouse Command.
 #
+# @return Eulerian::Status.
+#
 sub request
 {
+  my ( $self, $command ) = @_;
 }
 #
-# @brief
+# @brief Interface definition of the function used to cancel a request on
+#        Eulerian Data Warehouse Platform.
 #
 # @param $self - Eulerian Data Warehouse Peer.
 #
+# @return Eulerian::Status
+#
 sub cancel
 {
+  my ( $self ) = @_;
 }
 #
 # Endup module properly
@@ -405,6 +413,38 @@ I<Create a new Eulerian Data Warehouse Peer instance.>
 
 =back
 
+=head2 request()
+
+I<Send command to Eulerian Data Warehouse Platform>
+
+=head3 input
+
+=over 4
+
+=item * command. Eulerian Data Warehouse command.
+
+=back
+
+=head3 output
+
+=over 4
+
+=item * Eulerian::Status.
+
+=back
+
+=head2 cancel()
+
+I<Cancel Eulerian Data Warehouse Job on Eulerian Data Warehouse Platform>
+
+=head3 output
+
+=over 4
+
+=item * Eulerian::Status.
+
+=back
+
 =head2 class()
 
 I<Get Eulerian Data Warehouse Peer class name.>
@@ -430,6 +470,7 @@ I<Get/Set Eulerian Authority token kind.>
 =back
 
 =head3 output
+
 
 =over 4
 
@@ -563,6 +604,18 @@ o ip : Eulerian customer IP.
 
 =back
 
+=head2 headers()
+
+I<Allocate and initialize a valid HTTP headers>
+
+=head3 output
+
+=over 4
+
+=item * HTTP::Headers instance.
+
+=back
+
 =head1 AUTHOR
 
 Xavier Thorillon <x.thorillon@eulerian.com>
@@ -586,3 +639,5 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 
 =cut
+
+

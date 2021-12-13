@@ -150,13 +150,13 @@ sub on_progress
 sub on_status
 {
   my ( $self, $uuid, $token, $errnum, $err, $updated ) = @_;
-  my $string = <<string_end;
-    $uuid : {
-     error_code => $errnum,
-     error_msg => $err,
-    }
-string_end
-  print( $string );
+  #  my $string = <<string_end;
+  #  $uuid : {
+  #   error_code => $errnum,
+  #   error_msg => $err,
+  #  }
+  #string_end
+  #print( $string );
 
 }
 #

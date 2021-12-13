@@ -60,6 +60,10 @@ use POSIX 'strftime';
 #
 use JSON 'encode_json';
 #
+# Import Eulerian::Bench
+#
+use Eulerian::Bench;
+#
 # Defines Parser class name matching format.
 #
 my %PARSERS = (
@@ -287,6 +291,7 @@ sub create
         )->{ data }->[ 0 ]
       );
     }
+
   }
 
   return $status;
@@ -511,25 +516,35 @@ sub parse
 sub request
 {
   my ( $self, $command ) = @_;
+  my $bench = new Eulerian::Bench();
   my $response;
   my $status;
   my $json;
 
   # Create Job on Eulerian Data Warehouse Platform
+  $bench->start();
   $status = $self->create( $command );
+  $bench->stage( 'create' );
 
   # Wait end of Job
+  $bench->start();
   while( ! $status->error() && $self->running( $status ) ) {
     $status = $self->status( $status );
   }
+  $bench->stage( 'running' );
 
   # If Done, download reply file
   if( ! $status->error() && $self->done( $status ) ) {
+    $bench->start();
     $status = $self->download( $status );
+    $bench->stage( 'download' );
     if( ! $status->error() ) {
       # Parse reply file, call hooks
+      $bench->start();
       $status = $self->parse( $status );
+      $bench->stage( 'parse' );
     }
+    $status->{ bench } = $bench;
   }
 
   return $status;
