@@ -207,13 +207,15 @@ Eulerian::Authority - Eulerian Authority module.
 
 =head1 DESCRIPTION
 
-This module is used to get Eulerian Data Warehouse Access or Session token from Eulerian Authority Services.
+This module is used to get Eulerian Data Warehouse Access or Session token from
+Eulerian Authority Services.
 
 =head1 METHODS
 
 =head2 bearer()
 
-I<Get a valid bearer value usable in HTTP Header Authorization from Eulerian Authority services>
+I<Get a valid bearer value usable in HTTP Header Authorization from Eulerian
+Authority services>
 
 =head3 input
 
@@ -235,7 +237,8 @@ I<Get a valid bearer value usable in HTTP Header Authorization from Eulerian Aut
 
 =over 4
 
-=item * Eulerian::Status instance. On success a new entry 'bearer' is inserted into the status.
+=item * Eulerian::Status instance. On success a new entry 'bearer' is inserted
+into the status.
 
 =back
 
