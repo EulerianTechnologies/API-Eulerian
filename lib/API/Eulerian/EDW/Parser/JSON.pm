@@ -15,15 +15,15 @@
 #
 # Setup module name
 #
-package Eulerian::Edw::Parsers::Json;
+package API::Eulerian::EDW::Parser::JSON;
 #
 # Enforce compilor rules
 #
 use strict; use warnings;
 #
-# Inherited interface from Eulerian::Edw::Parser
+# Inherited interface from API::Eulerian::EDW::Parser
 #
-use parent 'Eulerian::Edw::Parser';
+use parent 'API::Eulerian::EDW::Parser';
 #
 #
 #
@@ -35,11 +35,11 @@ use FileHandle;
 #
 # @brief
 #
-# @param $class - Eulerian::Edw::Parser class.
+# @param $class - API::Eulerian::EDW::Parser class.
 # @param $path - File Path.
 # @param $uuid - Request UUID.
 #
-# @return Eulerian::Edw::Json Parser.
+# @return API::Eulerian::EDW::Json Parser.
 #
 sub new
 {
@@ -75,7 +75,7 @@ sub parser
 #
 # @brief
 #
-# @param $self - Eulerian::Edw::Parser
+# @param $self - API::Eulerian::EDW::Parser
 #
 use Data::Dumper;
 sub do

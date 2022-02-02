@@ -3,7 +3,7 @@
 #
 # @file Request.pm
 #
-# @brief Eulerian Request module used to send HTTP request to remote Peer.
+# @brief API::Eulerian::EDW Request module used to send HTTP request to remote Peer.
 #
 # @author Thorillon Xavier:x.thorillon@eulerian.com
 #
@@ -15,15 +15,15 @@
 #
 # Setup module name.
 #
-package Eulerian::Request;
+package API::Eulerian::EDW::Request;
 #
 # Enforce compilor rules
 #
 use strict; use warnings;
 #
-# Import Eulerian::Status
+# Import API::Eulerian::EDW::Status
 #
-use Eulerian::Status;
+use API::Eulerian::EDW::Status;
 #
 # Import HTTP::Headers
 #
@@ -55,7 +55,7 @@ use Encode;
 #
 # @brief Create new HTTP Headers.
 #
-# @param $class - Eulerian::HTTP class.
+# @param $class - API::Eulerian::EDW::HTTP class.
 #
 # @return HTTP Headers.
 #
@@ -67,7 +67,7 @@ sub headers
 # @brief Test if the content type of given HTTP response is a
 #        JSON format.
 #
-# @param $class - Eulerian::Request Class.
+# @param $class - API::Eulerian::EDW::Request Class.
 # @param $response - HTTP response.
 #
 # @return 1 - Content type is JSON.
@@ -97,7 +97,7 @@ sub is_json
 #
 # @brief Get JSON object from HTTP response.
 #
-# @param $class - Eulerian::Request class.
+# @param $class - API::Eulerian::EDW::Request class.
 # @param $response - HTTP response.
 #
 # @return JSON object.
@@ -121,12 +121,12 @@ sub json
 #
 # @brief Do HTTP Get on given URL.
 #
-# @param $class - Eulerian::HTTP class.
+# @param $class - API::Eulerian::EDW::HTTP class.
 # @param $url - Remote URL.
 # @param $headers - HTTP::Headers.
 # @param $file - Local file path.
 #
-# @return Eulerian::Status instance.
+# @return API::Eulerian::EDW::Status instance.
 #
 sub get
 {
@@ -136,13 +136,13 @@ sub get
 #
 # @brief Do HTTP Post on given URL.
 #
-# @param $class - Eulerian::HTTP class.
+# @param $class - API::Eulerian::EDW::HTTP class.
 # @param $url - Remote URL.
 # @param $headers - HTTP::Headers.
 # @param $what - Request Data.
 # @param $type - Request Data Type.
 #
-# @return Eulerian::Status instance.
+# @return API::Eulerian::EDW::Status instance.
 #
 sub post
 {
@@ -152,7 +152,7 @@ sub post
 #
 # @brief Send HTTP request on given url.
 #
-# @param $class - Eulerian Request class.
+# @param $class - API::Eulerian::EDW Request class.
 # @param $method - HTTP method.
 # @param $url - Remote URL.
 # @param $headers - HTTP headers.
@@ -160,12 +160,12 @@ sub post
 # @param $type - Data type of POST request
 # @param $file - Local file path used to store HTTP reply.
 #
-# @return Eulerian::Status instance.
+# @return API::Eulerian::EDW::Status instance.
 #
 sub _request
 {
   my ( $class, $method, $url, $headers, $what, $type, $file ) = @_;
-  my $status = Eulerian::Status->new();
+  my $status = API::Eulerian::EDW::Status->new();
   my $endpoint;
   my $request;
 
@@ -204,7 +204,7 @@ sub _request
   # Send Request, wait response if file is defined reply content is
   # writen into local file.
   my $response = $endpoint->request( $request, $file );
-  my $json = Eulerian::Request->json( $response );
+  my $json = API::Eulerian::EDW::Request->json( $response );
 
   if( $response->code != HTTP_OK ) {
     $status->error( 1 );
@@ -230,7 +230,7 @@ __END__
 
 =head1  NAME
 
-Eulerian::Request - Eulerian Request module.
+API::Eulerian::EDW::Request - API::Eulerian::EDW Request module.
 
 =head1 DESCRIPTION
 
@@ -258,7 +258,7 @@ I<Send HTTP GET request on given url>
 
 =over 4
 
-=item * Eulerian::Status. On success a new entry named 'response' is inserted into the status.
+=item * API::Eulerian::EDW::Status. On success a new entry named 'response' is inserted into the status.
 
 =back
 
@@ -284,7 +284,7 @@ I<Send HTTP POST request on given url>
 
 =over 4
 
-=item * Eulerian::Status. On success a new entry named 'response' is inserted into the status.
+=item * API::Eulerian::EDW::Status. On success a new entry named 'response' is inserted into the status.
 
 =back
 
@@ -344,7 +344,7 @@ I<Get JSON message from HTTP response>
 
 =head1 SEE ALSO
 
-L<Eulerian::Status>
+L<API::Eulerian::EDW::Status>
 
 L<HTTP::Headers>
 
@@ -366,7 +366,7 @@ Xavier Thorillon <x.thorillon@eulerian.com>
 
 =head1 COPYRIGHT
 
-Copyright (c) 2008 Eulerian Technologies Ltd L<http://www.eulerian.com>
+Copyright (c) 2008 API::Eulerian::EDW Technologies Ltd L<http://www.eulerian.com>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

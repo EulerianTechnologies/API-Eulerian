@@ -3,7 +3,7 @@
 #
 # @file WebSocket.pm
 #
-# @brief Eulerian Request module used to read Websocket messages from remote
+# @brief API::Eulerian::EDW Request module used to read Websocket messages from remote
 #        peer
 #
 # @author Thorillon Xavier:x.thorillon@eulerian.com
@@ -16,7 +16,7 @@
 #
 # Setup module name.
 #
-package Eulerian::WebSocket;
+package API::Eulerian::EDW::WebSocket;
 #
 # Enforce compilor rules
 #
@@ -34,17 +34,17 @@ use Protocol::WebSocket::Client;
 #
 use IO::Select;
 #
-# Import Eulerian::Status
+# Import API::Eulerian::EDW::Status
 #
-use Eulerian::Status;
+use API::Eulerian::EDW::Status;
 #
-# @brief Allocate and initialize a new Eulerian Websocket.
+# @brief Allocate and initialize a new API::Eulerian::EDW Websocket.
 #
-# @param $class - Eulerian::WebSocket class.
+# @param $class - API::Eulerian::EDW::WebSocket class.
 # @param $host - Remote host.
 # @param $port - Remote port.
 #
-# @return Eulerian WebSocket instance.
+# @return API::Eulerian::EDW WebSocket instance.
 #
 sub new
 {
@@ -63,7 +63,7 @@ sub new
 #
 # @brief Get Socket.
 #
-# @param $self - Eulerian::WebSocket instance.
+# @param $self - API::Eulerian::EDW::WebSocket instance.
 #
 # @return Socket.
 #
@@ -72,9 +72,9 @@ sub _socket
   return shift->{ _SOCKET };
 }
 #
-# @brief Get Eulerian Websocket Remote Host.
+# @brief Get API::Eulerian::EDW Websocket Remote Host.
 #
-# @param $self - Eulerian::WebSocket instance.
+# @param $self - API::Eulerian::EDW::WebSocket instance.
 #
 # @return Remote Host.
 #
@@ -83,9 +83,9 @@ sub host
   return shift->socket()->peerhost();
 }
 #
-# @brief Get Eulerian Websocket Remote Port.
+# @brief Get API::Eulerian::EDW Websocket Remote Port.
 #
-# @param $self - Eulerian::WebSocket instance.
+# @param $self - API::Eulerian::EDW::WebSocket instance.
 #
 # @return Remote Port.
 #
@@ -144,16 +144,16 @@ sub _on_connect
 #
 # @brief Join given url in Websocket mode, call hook for each received buffer.
 #
-# @param $self - Eulerian::WebSocket instance.
+# @param $self - API::Eulerian::EDW::WebSocket instance.
 # @param $url - Remote url.
 # @param $hooks - User specific hook callback.
 #
-# @return Eulerian::Status instance.
+# @return API::Eulerian::EDW::Status instance.
 #
 sub join
 {
   my ( $self, $url, $hook ) = @_;
-  my $status = Eulerian::Status->new();
+  my $status = API::Eulerian::EDW::Status->new();
   my $socket = $self->_socket();
   my $bufsize = 252000;
   my $offset = 0;
@@ -166,10 +166,10 @@ sub join
   $peer = Protocol::WebSocket::Client->new( url => $url );
 
   # Setup Websocket hooks
-  $peer->on( write   => \&Eulerian::WebSocket::_on_write );
-  $peer->on( read    => \&Eulerian::WebSocket::_on_read );
-  $peer->on( error   => \&Eulerian::WebSocket::_on_error );
-  $peer->on( connect => \&Eulerian::WebSocket::_on_connect );
+  $peer->on( write   => \&API::Eulerian::EDW::WebSocket::_on_write );
+  $peer->on( read    => \&API::Eulerian::EDW::WebSocket::_on_read );
+  $peer->on( error   => \&API::Eulerian::EDW::WebSocket::_on_error );
+  $peer->on( connect => \&API::Eulerian::EDW::WebSocket::_on_connect );
 
   # Save back refs
   $self->{ _HOOK } = $hook;
@@ -209,7 +209,7 @@ __END__
 
 =head1  NAME
 
-Eulerian::WebSocket - Eulerian WebSocket module.
+API::Eulerian::EDW::WebSocket - API::Eulerian::EDW WebSocket module.
 
 =head1 DESCRIPTION
 
@@ -219,7 +219,7 @@ This module is used to read WebSocket message from remote host.
 
 =head2 new()
 
-I<Create a new instance of Eulerian Websocket>
+I<Create a new instance of API::Eulerian::EDW Websocket>
 
 =head3 input
 
@@ -235,7 +235,7 @@ I<Create a new instance of Eulerian Websocket>
 
 =over 4
 
-=item * Eulerian::Websocket instance.
+=item * API::Eulerian::EDW::Websocket instance.
 
 =back
 
@@ -257,7 +257,7 @@ I<Join Websocket, read message and call matching callback hook>
 
 =over 4
 
-=item * Eulerian::Status.
+=item * API::Eulerian::EDW::Status.
 
 =back
 
@@ -269,7 +269,7 @@ L<IO::Select>
 
 L<Protocol::WebSocket::Client>
 
-L<Eulerian::Status>
+L<API::Eulerian::EDW::Status>
 
 =head1 AUTHOR
 
@@ -277,7 +277,7 @@ Xavier Thorillon <x.thorillon@eulerian.com>
 
 =head1 COPYRIGHT
 
-Copyright (c) 2008 Eulerian Technologies Ltd L<http://www.eulerian.com>
+Copyright (c) 2008 API::Eulerian::EDW Technologies Ltd L<http://www.eulerian.com>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

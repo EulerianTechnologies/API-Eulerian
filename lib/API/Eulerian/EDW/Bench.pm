@@ -3,7 +3,7 @@
 #
 # @file Bench.pm
 #
-# @brief Eulerian Bench module used to get elapsed time of script stages.
+# @brief API::Eulerian::EDW Bench module used to get elapsed time of script stages.
 #
 # @author Thorillon Xavier:x.thorillon@eulerian.com
 #
@@ -15,21 +15,21 @@
 #
 # Setup perl package name
 #
-package Eulerian::Bench;
+package API::Eulerian::EDW::Bench;
 #
 # Enforce compilor rules.
 #
 use strict; use warnings;
 #
-# Import Eulerian::Chrono
+# Import API::Eulerian::EDW::Chrono
 #
-use Eulerian::Chrono;
+use API::Eulerian::EDW::Chrono;
 #
-# @brief Allocate and initialize a new Eulerian::Bench instance.
+# @brief Allocate and initialize a new API::Eulerian::EDW::Bench instance.
 #
-# @param $class - Eulerian::Bench class.
+# @param $class - API::Eulerian::EDW::Bench class.
 #
-# @return Eulerian::Bench instance.
+# @return API::Eulerian::EDW::Bench instance.
 #
 sub new
 {
@@ -42,16 +42,16 @@ sub new
 #
 # @brief Start chronograph.
 #
-# @param $self - Eulerian::Bench instance.
+# @param $self - API::Eulerian::EDW::Bench instance.
 #
 sub start
 {
-  shift->last( new Eulerian::Chrono() );
+  shift->last( new API::Eulerian::EDW::Chrono() );
 }
 #
 # @brief Get/Set First Stage.
 #
-# @param $self - Eulerian::Bench instance.
+# @param $self - API::Eulerian::EDW::Bench instance.
 # @param $first - First stage.
 #
 # @return First stage.
@@ -65,7 +65,7 @@ sub first
 #
 # @brief Get/Set Last stage.
 #
-# @param $self - Eulerian::Bench instance.
+# @param $self - API::Eulerian::EDW::Bench instance.
 # @param $last - Last stage.
 #
 # @retun Last stage.
@@ -81,7 +81,7 @@ sub last
 #
 # @brief Stop watching current Stage save elapsed time.
 #
-# @param $self - Eulerian::Bench instance.
+# @param $self - API::Eulerian::EDW::Bench instance.
 # @param $name - Stage name.
 #
 # @return Stage.
@@ -94,7 +94,7 @@ sub stage
 #
 # @brief Dump Bench stages suites.
 #
-# @param $self - Eulerian::Bench instance.
+# @param $self - API::Eulerian::EDW::Bench instance.
 #
 sub dump
 {
@@ -118,7 +118,7 @@ __END__
 
 =head1  NAME
 
-Eulerian::Bench - Eulerian Bench module.
+API::Eulerian::EDW::Bench - API::Eulerian::EDW Bench module.
 
 =head1 DESCRIPTION
 
@@ -128,13 +128,13 @@ This module is used to bench script time execution.
 
 =head2 new()
 
-I<Allocate and initialize a new Eulerian::Bench instance>
+I<Allocate and initialize a new API::Eulerian::EDW::Bench instance>
 
 =head3 output
 
 =over 4
 
-=item * Eulerian::Bench instance.
+=item * API::Eulerian::EDW::Bench instance.
 
 =back
 
@@ -146,7 +146,7 @@ I<Start chronograph on current bench stage>
 
 =over 4
 
-=item * Eulerian::Bench instance.
+=item * API::Eulerian::EDW::Bench instance.
 
 =back
 
@@ -158,7 +158,7 @@ I<Get chronograph of the first bench stage.>
 
 =over 4
 
-=item * Eulerian::Bench instance.
+=item * API::Eulerian::EDW::Bench instance.
 
 =back
 
@@ -166,7 +166,7 @@ I<Get chronograph of the first bench stage.>
 
 =over 4
 
-=item * Eulerian::Chrono instance.
+=item * API::Eulerian::EDW::Chrono instance.
 
 =back
 
@@ -178,7 +178,7 @@ I<Get chronograph of the last bench stage.>
 
 =over 4
 
-=item * Eulerian::Bench instance.
+=item * API::Eulerian::EDW::Bench instance.
 
 =back
 
@@ -186,7 +186,7 @@ I<Get chronograph of the last bench stage.>
 
 =over 4
 
-=item * Eulerian::Chrono instance.
+=item * API::Eulerian::EDW::Chrono instance.
 
 =back
 
@@ -198,7 +198,7 @@ I<End counting elapsed time on current stage>
 
 =over 4
 
-=item * Eulerian::Bench instance.
+=item * API::Eulerian::EDW::Bench instance.
 
 =item * Stage name.
 
@@ -208,7 +208,7 @@ I<End counting elapsed time on current stage>
 
 =over 4
 
-=item * Eulerian::Chrono instance.
+=item * API::Eulerian::EDW::Chrono instance.
 
 =back
 
@@ -220,13 +220,13 @@ I<Dump Bench suite>
 
 =over 4
 
-=item * Eulerian::Bench instance.
+=item * API::Eulerian::EDW::Bench instance.
 
 =back
 
 =head1 SEE ALSO
 
-L<Eulerian::Chrono>
+L<API::Eulerian::EDW::Chrono>
 
 =head1 AUTHOR
 
@@ -234,7 +234,7 @@ Xavier Thorillon <x.thorillon@eulerian.com>
 
 =head1 COPYRIGHT
 
-Copyright (c) 2008 Eulerian Technologies Ltd L<http://www.eulerian.com>
+Copyright (c) 2008 API::Eulerian::EDW Technologies Ltd L<http://www.eulerian.com>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

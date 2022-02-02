@@ -3,7 +3,7 @@
 #
 # @file Print.pm
 #
-# @brief Eulerian Data Warehouse Peer Print Hooks class Module definition.
+# @brief Eulerian Data Warehouse Peer Print Hook class Module definition.
 #
 # This module is aimed to print Eulerian Data Warehouse Analytics Results into
 # the terminal.
@@ -18,22 +18,22 @@
 #
 # Setup module name
 #
-package Eulerian::Edw::Hooks::Print;
+package API::Eulerian::EDW::Hook::Print;
 #
 # Enforce compilor rules
 #
 use strict; use warnings;
 #
-# Inherited interface from Eulerian::Edw::Hooks
+# Inherited interface from API::Eulerian::EDW::Hook
 #
-use parent 'Eulerian::Edw::Hooks';
+use parent 'API::Eulerian::EDW::Hook';
 #
-# @brief Allocate a new Eulerian Data Warehouse Peer Hooks.
+# @brief Allocate a new Eulerian Data Warehouse Peer Hook.
 #
-# @param $class - Eulerian Data Warehouse Peer Hooks Class.
+# @param $class - Eulerian Data Warehouse Peer Hook Class.
 # @param $setup - Setup attributes.
 #
-# @return Eulerian Data Warehouse Peer Hooks instance.
+# @return Eulerian Data Warehouse Peer Hook instance.
 #
 sub new
 {
@@ -41,9 +41,9 @@ sub new
   return $class->SUPER::new( $setup );
 }
 #
-# @brief Setup Eulerian Data Warehouse Peer Hooks.
+# @brief Setup Eulerian Data Warehouse Peer Hook.
 #
-# @param $self - Eulerian Data Warehouse Peer Hooks.
+# @param $self - Eulerian Data Warehouse Peer Hook.
 # @param $setup - Setup entries.
 #
 sub setup
@@ -53,7 +53,7 @@ sub setup
 #
 # @brief Start a new Analysis.
 #
-# @param $self - Eulerian Data Warehouse Peer Hooks.
+# @param $self - Eulerian Data Warehouse Peer Hook.
 # @param $uuid - UUID of Eulerian Analytics Analysis.
 # @param $start - Timerange begin.
 # @param $end - Timerange end.
@@ -86,7 +86,7 @@ string_end
 #
 # @brief Analysis reply rows on Row outputs analysis.
 #
-# @param $self - Eulerian Data Warehouse Peer Hooks.
+# @param $self - Eulerian Data Warehouse Peer Hook.
 # @param $uuid - UUID of Eulerian Analytics Analysis.
 # @param $rows - Array of Array of Columns values.
 #
@@ -107,7 +107,7 @@ sub on_add
 #
 # @brief Analysis reply rows on Distinct/Pivot analysis.
 #
-# @param $self - Eulerian Data Warehouse Peer Hooks.
+# @param $self - Eulerian Data Warehouse Peer Hook.
 # @param $uuid - UUID of Eulerian Analytics Analysis.
 # @param $rows - Array of Array of Columns values.
 #
@@ -128,7 +128,7 @@ sub on_replace
 #
 # @brief Analysis progression callback.
 #
-# @param $self - Eulerian Data Warehouse Peer Hooks.
+# @param $self - Eulerian Data Warehouse Peer Hook.
 # @param $uuid - UUID of Eulerian Analytics Analysis.
 # @param $progress - Progression value.
 #
@@ -140,7 +140,7 @@ sub on_progress
 #
 # @brief End of Eulerian Data Warehouse Analysis.
 #
-# @param $self - Eulerian Data Warehouse Peer Hooks.
+# @param $self - Eulerian Data Warehouse Peer Hook.
 # @param $uuid - UUID of Eulerian Analytics Analysis.
 # @param $token - AES Token or Bearer.
 # @param $errnum - Error number.

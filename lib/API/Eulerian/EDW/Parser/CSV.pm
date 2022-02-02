@@ -1,9 +1,9 @@
 #/usr/bin/env perl
 ###############################################################################
 #
-# @file Csv.pm
+# @file CSV.pm
 #
-# @brief Eulerian Data Warehouse REST Csv Parser Module definition.
+# @brief Eulerian Data Warehouse REST CSV Parser Module definition.
 #
 # @author Thorillon Xavier:x.thorillon@eulerian.com
 #
@@ -15,15 +15,15 @@
 #
 # Setup module name
 #
-package Eulerian::Edw::Parsers::Csv;
+package API::Eulerian::EDW::Parser::CSV;
 #
 # Enforce compilor rules
 #
 use strict; use warnings;
 #
-# Inherited interface from Eulerian::Edw::Parser
+# Inherited interface from API::Eulerian::EDW::Parser
 #
-use parent 'Eulerian::Edw::Parser';
+use parent 'API::Eulerian::EDW::Parser';
 #
 # Import Text::CSV
 #
@@ -31,11 +31,11 @@ use Text::CSV;
 #
 # @brief
 #
-# @param $class - Eulerian::Edw::Parser class.
+# @param $class - API::Eulerian::EDW::Parser class.
 # @param $path - File Path.
 # @param $uuid - Request uuid.
 #
-# @return Eulerian::Edw::Json Parser.
+# @return API::Eulerian::EDW::Json Parser.
 #
 sub new
 {
@@ -81,7 +81,7 @@ sub parser
 #
 # @brief
 #
-# @param $self - Eulerian::Edw::Parser
+# @param $self - API::Eulerian::EDW::Parser
 #
 sub do
 {

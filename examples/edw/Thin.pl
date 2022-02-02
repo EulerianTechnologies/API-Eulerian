@@ -1,10 +1,10 @@
 #/usr/bin/env perl
 ###############################################################################
 #
-# @file Rest.pl
+# @file Thin.pl
 #
 # @brief Example of Eulerian Data Warehouse Peer performing an Analysis using
-#        Rest Protocol.
+#        Thin Protocol.
 #
 # @author Thorillon Xavier:x.thorillon@eulerian.com
 #
@@ -18,13 +18,13 @@
 #
 use strict; use warnings;
 #
-# Import Eulerian::Edw::Peer instance factory
+# Import API::Eulerian::EDW::Peer instance factory
 #
-use Eulerian::Edw::Peer;
+use API::Eulerian::EDW::Peer;
 #
-# Import Eulerian::Edw::Hooks::Print
+# Import API::Eulerian::EDW::Hook::Print
 #
-use Eulerian::Edw::Hooks::Print;
+use API::Eulerian::EDW::Hook::Print;
 #
 # Sanity check mandatory command file
 #
@@ -32,19 +32,19 @@ unless( defined( $ARGV[ 0 ] ) ) {
   die "Mandatory argument command file path is missing";
 }
 #
-# Create a user specific Hooks used to handle Analysis replies.
+# Create a user specific Hook used to handle Analysis replies.
 #
-my $hooks = new Eulerian::Edw::Hooks::Print();
+my $hook = new API::Eulerian::EDW::Hook::Print();
 #
 # Setup Peer options
 #
 my $path = $ARGV[ 0 ];
 my %setup = (
-  class => 'Eulerian::Edw::Peers::Rest',
-  hooks => $hooks,
+  class => 'API::Eulerian::EDW::Peer::Thin',
+  hook => $hook,
   grid => '', # TODO
   ip => '', # TODO
-  token => '', #TODO
+  token => '', # TODO
 );
 my $status;
 my $peer;
@@ -58,8 +58,8 @@ if( $status->error() ) {
   # Get command from file
   $cmd = $status->{ data };
   # Create Peer instance
-  $peer = new Eulerian::Edw::Peer( \%setup );
-  # Send Command, call hooks
+  $peer = new API::Eulerian::EDW::Peer( \%setup );
+  # Send Command, call hook
   $status = $peer->request( $cmd );
   if( $status->error() ) {
     $status->dump();

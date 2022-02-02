@@ -3,7 +3,7 @@
 #
 # @file File.pm
 #
-# @brief Eulerian::File module used to manage local file system.
+# @brief API::Eulerian::EDW::File module used to manage local file system.
 #
 # @author Thorillon Xavier:x.thorillon@eulerian.com
 #
@@ -15,25 +15,25 @@
 #
 # Setup perl package name
 #
-package Eulerian::File;
+package API::Eulerian::EDW::File;
 #
 # Enforce compilor rules
 #
 use strict; use warnings;
 #
-# Import Eulerian::Status
+# Import API::Eulerian::EDW::Status
 #
-use Eulerian::Status;
+use API::Eulerian::EDW::Status;
 #
 # @brief Read file content.
 #
 # @param path - File path.
 #
-# @return Eulerian::Status
+# @return API::Eulerian::EDW::Status
 #
 sub read
 {
-  my $status = Eulerian::Status->new();
+  my $status = API::Eulerian::EDW::Status->new();
   my ( $class, $path ) = @_;
   my $data;
   my $fd;
@@ -55,7 +55,7 @@ sub read
 #
 # @brief Test if given path is writable.
 #
-# @param $class - Eulerian::File class.
+# @param $class - API::Eulerian::EDW::File class.
 # @param $path - Filesystem path.
 #
 # @return 0 - Path isnt writable.
@@ -77,7 +77,7 @@ __END__
 
 =head1  NAME
 
-Eulerian::File - Eulerian File module.
+API::Eulerian::EDW::File - API::Eulerian::EDW File module.
 
 =head1 DESCRIPTION
 
@@ -101,7 +101,7 @@ I<Read the content of a given file path.>
 
 =over 4
 
-=item * Instance of an Eulerian::Status. On success, a new entry named 'data' is inserted into
+=item * Instance of an API::Eulerian::EDW::Status. On success, a new entry named 'data' is inserted into
 the Status.
 
 =back
@@ -130,7 +130,7 @@ I<Test if a given path is writable.>
 
 =head1 SEE ALSO
 
-L<Eulerian::Status>
+L<API::Eulerian::EDW::Status>
 
 =head1 AUTHOR
 
@@ -138,7 +138,7 @@ Xavier Thorillon <x.thorillon@eulerian.com>
 
 =head1 COPYRIGHT
 
-Copyright (c) 2008 Eulerian Technologies Ltd L<http://www.eulerian.com>
+Copyright (c) 2008 API::Eulerian::EDW Technologies Ltd L<http://www.eulerian.com>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

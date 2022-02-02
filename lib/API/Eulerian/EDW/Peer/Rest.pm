@@ -18,35 +18,35 @@
 #
 # Setup module name
 #
-package Eulerian::Edw::Peers::Rest;
+package API::Eulerian::EDW::Rest;
 #
 # Enforce compilor rules
 #
 use strict; use warnings;
 #
-# Inherited interface from Eulerian::Edw::Peer
+# Inherited interface from API::Eulerian::EDW::Peer
 #
-use parent 'Eulerian::Edw::Peer';
+use parent 'API::Eulerian::EDW::Peer';
 #
-# Import Eulerian::Authority
+# Import API::Eulerian::EDW::Authority
 #
-use Eulerian::Authority;
+use API::Eulerian::EDW::Authority;
 #
-# Import Eulerian::File
+# Import API::Eulerian::EDW::File
 #
-use Eulerian::File;
+use API::Eulerian::EDW::File;
 #
-# Import Eulerian::Status
+# Import API::Eulerian::EDW::Status
 #
-use Eulerian::Status;
+use API::Eulerian::EDW::Status;
 #
-# Import Eulerian::Edw::Parsers::Json
+# Import API::Eulerian::EDW::Parser::JSON
 #
-use Eulerian::Edw::Parsers::Json;
+use API::Eulerian::EDW::Parser::JSON;
 #
-# Import Eulerian::Edw::Parsers::Csv
+# Import API::Eulerian::EDW::Parser::CSV
 #
-use Eulerian::Edw::Parsers::Csv;
+use API::Eulerian::EDW::Parser::CSV;
 #
 # Import Hostname
 #
@@ -60,15 +60,15 @@ use POSIX 'strftime';
 #
 use JSON 'encode_json';
 #
-# Import Eulerian::Bench
+# Import API::Eulerian::EDW::Bench
 #
-use Eulerian::Bench;
+use API::Eulerian::EDW::Bench;
 #
 # Defines Parser class name matching format.
 #
 my %PARSERS = (
-  'json' => 'Eulerian::Edw::Parsers::Json',
-  'csv'  => 'Eulerian::Edw::Parsers::Csv',
+  'json' => 'API::Eulerian::EDW::Parser::JSON',
+  'csv'  => 'API::Eulerian::EDW::Parser::CSV',
 );
 #
 # @brief Allocate and initialize a new Eulerian Data Warehouse Rest Peer.
@@ -84,7 +84,7 @@ sub new
   my $self;
 
   # Call base instance constructor
-  $self = $class->SUPER::create( 'Eulerian::Edw::Peers::Rest' );
+  $self = $class->SUPER::create( 'API::Eulerian::EDW::Rest' );
 
   # Setup Rest Peer Default attributes values
   $self->{ _ACCEPT } = 'application/json';
@@ -281,12 +281,12 @@ sub create
     my $url = $self->url() . '/edw/jobs';
 
     # Post Job create request to remote host
-    $status = Eulerian::Request->post(
+    $status = API::Eulerian::EDW::Request->post(
       $url, $status->{ headers }, $self->body( $command )
       );
     if( ! $status->error() ) {
       $self->uuid(
-        Eulerian::Request->json(
+        API::Eulerian::EDW::Request->json(
           $status->{ response }
         )->{ data }->[ 0 ]
       );
@@ -308,12 +308,12 @@ sub status
 {
   my ( $self, $status ) = @_;
   my $response = $status->{ response };
-  my $url = Eulerian::Request->json(
+  my $url = API::Eulerian::EDW::Request->json(
     $response )->{ data }->[ 1 ];
 
   $status = $self->headers();
   if( ! $status->error() ) {
-    $status = Eulerian::Request->get(
+    $status = API::Eulerian::EDW::Request->get(
       $url, $status->{ headers }
       );
   }
@@ -323,7 +323,7 @@ sub status
 #
 # @brief Test if Job status is 'Running';
 #
-# @param $self - Eulerian::Edw::Peers::Rest instance.
+# @param $self - API::Eulerian::EDW::Rest instance.
 # @param $rc - Return context.
 #
 # @return 0 - Not running.
@@ -332,14 +332,14 @@ sub status
 sub running
 {
   my ( $self, $status ) = @_;
-  return Eulerian::Request->json(
+  return API::Eulerian::EDW::Request->json(
     $status->{ response }
     )->{ status } eq 'Running';
 }
 #
 # @brief Test if Job status is 'Done'.
 #
-# @param $self - Eulerian::Edw::Peers::Rest instance.
+# @param $self - API::Eulerian::EDW::Rest instance.
 # @param $rc - Return context.
 #
 # @return 0 - Not Done.
@@ -349,7 +349,7 @@ sub done
 {
   my ( $self, $status ) = @_;
   return ! $status->{ error } ?
-    Eulerian::Request->json(
+    API::Eulerian::EDW::Request->json(
       $status->{ response }
       )->{ status } eq 'Done' :
       0;
@@ -357,7 +357,7 @@ sub done
 #
 # @brief Get Path to local filepath.
 #
-# @param $self - Eulerian::Edw::Peers::Rest instance.
+# @param $self - API::Eulerian::EDW::Rest instance.
 #
 # @return Local file path.
 #
@@ -365,9 +365,9 @@ sub path
 {
   my ( $self, $response ) = @_;
   my $encoding = $self->encoding();
-  my $json = Eulerian::Request->json( $response );
+  my $json = API::Eulerian::EDW::Request->json( $response );
   my $pattern = '([0-9]*)\.(json|csv|parquet)';
-  my $status = Eulerian::Status->new();
+  my $status = API::Eulerian::EDW::Status->new();
   my $url = $json->{ data }->[ 1 ];
   my $wdir = $self->wdir();
   my %rc = ();
@@ -376,7 +376,7 @@ sub path
     $status->error( 1 );
     $status->code( 400 );
     $status->msg( "Working directory isn't set" );
-  } elsif( ! Eulerian::File->writable( $wdir ) ) {
+  } elsif( ! API::Eulerian::EDW::File->writable( $wdir ) ) {
     $status->error( 1 );
     $status->code( 400 );
     $status->msg( "Working directory isn't writable" );
@@ -396,7 +396,7 @@ sub path
 #
 # @brief Unzip given file.
 #
-# @param $self - Eulerian::Edw::Peers::Rest instance.
+# @param $self - API::Eulerian::EDW::Rest instance.
 # @param $zipped - Path to zipped file.
 #
 # @return Path to unzipped file.
@@ -450,7 +450,7 @@ sub download
     if( ! $status->{ error } ) {
       # Send Download request to remote host, reply is
       # writen into $path file
-      $status = Eulerian::Request->get(
+      $status = API::Eulerian::EDW::Request->get(
         $url, $status->{ headers }, $path
         );
       # Handle errors
@@ -467,7 +467,7 @@ sub download
 #
 # @brief Parse local file path and invoke hooks handlers.
 #
-# @param $self - Eulerian::Edw::Peers::Rest instance.
+# @param $self - API::Eulerian::EDW::Rest instance.
 # @param $rc - Reply context.
 #
 # @return Reply context.
@@ -516,7 +516,7 @@ sub parse
 sub request
 {
   my ( $self, $command ) = @_;
-  my $bench = new Eulerian::Bench();
+  my $bench = new API::Eulerian::EDW::Bench();
   my $response;
   my $status;
   my $json;
@@ -552,7 +552,7 @@ sub request
 #
 # @brief Cancel Job on Eulerian Data Warehouse Platform.
 #
-# @param $self - Eulerian::Edw::Peers::Rest instance.
+# @param $self - API::Eulerian::EDW::Rest instance.
 # @param $rc - Reply context.
 #
 sub cancel
@@ -576,7 +576,7 @@ sub cancel
 
       $url .= $self->uuid() . '/cancel';
       # Send Cancel request to remote host
-      $status = Eulerian::Request->get( $url, $headers );
+      $status = API::Eulerian::EDW::Request->get( $url, $headers );
 
     }
   }

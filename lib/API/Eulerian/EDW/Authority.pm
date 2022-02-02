@@ -3,7 +3,7 @@
 #
 # @file Authority.pm
 #
-# @brief Eulerian Authority module used to get Eulerian Data Warehouse
+# @brief API::Eulerian::EDW Authority module used to get API::Eulerian::EDW Data Warehouse
 #        Access/Session Tokens.
 #
 # @author Thorillon Xavier:x.thorillon@eulerian.com
@@ -16,19 +16,19 @@
 #
 # Setup perl package name
 #
-package Eulerian::Authority;
+package API::Eulerian::EDW::Authority;
 #
 # Enforce compilor rules
 #
 use strict; use warnings;
 #
-# Import Eulerian::Request ( HTTP requests )
+# Import API::Eulerian::EDW::Request ( HTTP requests )
 #
-use Eulerian::Request;
+use API::Eulerian::EDW::Request;
 #
-# Import Eulerian::Status
+# Import API::Eulerian::EDW::Status
 #
-use Eulerian::Status;
+use API::Eulerian::EDW::Status;
 #
 # URL domain matching platform names
 #
@@ -44,17 +44,17 @@ my %KINDS = (
   'access'  => '/er/account/get_dw_access_token.json?ip=',
 );
 #
-# @brief Get valid HTTP Authorization bearer used to access Eulerian
+# @brief Get valid HTTP Authorization bearer used to access API::Eulerian::EDW
 #        Data Warehouse Platform.
 #
-# @param $class - Eulerian Authority class.
-# @param $kind - Eulerian Authority token kind.
-# @param $platform - Eulerian Authority Platform.
-# @param $grid - Eulerian Data Warehouse Grid.
+# @param $class - API::Eulerian::EDW Authority class.
+# @param $kind - API::Eulerian::EDW Authority token kind.
+# @param $platform - API::Eulerian::EDW Authority Platform.
+# @param $grid - API::Eulerian::EDW Data Warehouse Grid.
 # @param $ip - Peer IP.
-# @param $token - Eulerian Token.
+# @param $token - API::Eulerian::EDW Token.
 #
-# @return Eulerian::Status
+# @return API::Eulerian::EDW::Status
 #
 sub bearer
 {
@@ -64,18 +64,18 @@ sub bearer
   my $code;
   my $json;
 
-  # Get URL used to request Eulerian Authority for Token.
+  # Get URL used to request API::Eulerian::EDW Authority for Token.
   $status = $class->_url( $kind, $platform, $grid, $ip, $token );
   # Handle errors
   if( ! $status->error() ) {
-    # Request Eulerian Authority
-    $status = Eulerian::Request->get( $status->{ url } );
+    # Request API::Eulerian::EDW Authority
+    $status = API::Eulerian::EDW::Request->get( $status->{ url } );
     # Get HTTP response
     $response = $status->{ response };
     # Get HTTP response code
     $code = $response->code;
     # We expect JSON reply data
-    $json = Eulerian::Request->json( $response );
+    $json = API::Eulerian::EDW::Request->json( $response );
     if( $json && ( $code == 200 ) ) {
       $status = $json->{ error } ?
         $class->_error( $code, $json->{ error_msg } ) :
@@ -92,17 +92,17 @@ sub bearer
   return $status;
 }
 #
-# @brief Get Eulerian Authority URL used to retrieve Session/Access Token
-#        to Eulerian Data Warehouse Platform.
+# @brief Get API::Eulerian::EDW Authority URL used to retrieve Session/Access Token
+#        to API::Eulerian::EDW Data Warehouse Platform.
 #
-# @param $class - Eulerian::Authority Class.
-# @param $kind - Eulerian Data Warehouse Token Kind.
-# @param $platform - Eulerian Data Warehouse Platform name.
-# @param $grid - Eulerian Data Warehouse Site Grid name.
-# @param $ip - IP of Eulerian Data Warehouse Peer.
-# @param $token - Eulerian Token.
+# @param $class - API::Eulerian::EDW::Authority Class.
+# @param $kind - API::Eulerian::EDW Data Warehouse Token Kind.
+# @param $platform - API::Eulerian::EDW Data Warehouse Platform name.
+# @param $grid - API::Eulerian::EDW Data Warehouse Site Grid name.
+# @param $ip - IP of API::Eulerian::EDW Data Warehouse Peer.
+# @param $token - API::Eulerian::EDW Token.
 #
-# @return Eulerian::Status
+# @return API::Eulerian::EDW::Status
 #
 sub _url
 {
@@ -144,7 +144,7 @@ sub _url
   } elsif( ! ( $domain = $DOMAINS{ $platform } ) ) {
     return $class->_error( 506, "Invalid platform : $platform" );
   } else {
-    my $status = Eulerian::Status->new();
+    my $status = API::Eulerian::EDW::Status->new();
     my $url;
 
     $url  = 'https://';
@@ -158,36 +158,36 @@ sub _url
   }
 }
 #
-# @brief Return Error on Eulerian Authority Services.
+# @brief Return Error on API::Eulerian::EDW Authority Services.
 #
-# @param $class - Eulerian::Authority class.
+# @param $class - API::Eulerian::EDW::Authority class.
 # @param $code - HTTP Error code.
 # @param $message - Error message.
 #
-# return Eulerian::Status
+# return API::Eulerian::EDW::Status
 #
 sub _error
 {
   my ( $class, $code, $message ) = @_;
-  my $status = Eulerian::Status->new();
+  my $status = API::Eulerian::EDW::Status->new();
   $status->error( 1 );
   $status->code( $code );
   $status->msg( $message );
   return $status;
 }
 #
-# @brief Return Success on Eulerian Authority Services.
+# @brief Return Success on API::Eulerian::EDW Authority Services.
 #
-# @param $class - Eulerian::Authority class.
+# @param $class - API::Eulerian::EDW::Authority class.
 # @param $kind - Token kind.
 # @param $json - Json reply.
 #
-# @return Eulerian::Status
+# @return API::Eulerian::EDW::Status
 #
 sub _success
 {
   my ( $class, $kind, $json ) = @_;
-  my $status = Eulerian::Status->new();
+  my $status = API::Eulerian::EDW::Status->new();
   my $row = $json->{ data }->{ rows }->[ 0 ];
   $status->{ bearer } = 'bearer ' . $row->{ $kind . '_token' };
   return $status;
@@ -203,18 +203,18 @@ __END__
 
 =head1  NAME
 
-Eulerian::Authority - Eulerian Authority module.
+API::Eulerian::EDW::Authority - API::Eulerian::EDW Authority module.
 
 =head1 DESCRIPTION
 
-This module is used to get Eulerian Data Warehouse Access or Session token from
-Eulerian Authority Services.
+This module is used to get API::Eulerian::EDW Data Warehouse Access or Session token from
+API::Eulerian::EDW Authority Services.
 
 =head1 METHODS
 
 =head2 bearer()
 
-I<Get a valid bearer value usable in HTTP Header Authorization from Eulerian
+I<Get a valid bearer value usable in HTTP Header Authorization from API::Eulerian::EDW
 Authority services>
 
 =head3 input
@@ -223,7 +223,7 @@ Authority services>
 
 =item * kind - Token Kind ( session, access ).
 
-=item * platform - Eulerian Authority Services Platform ( fr, can ).
+=item * platform - API::Eulerian::EDW Authority Services Platform ( fr, can ).
 
 =item * grid - Customer Grid.
 
@@ -237,16 +237,16 @@ Authority services>
 
 =over 4
 
-=item * Eulerian::Status instance. On success a new entry 'bearer' is inserted
+=item * API::Eulerian::EDW::Status instance. On success a new entry 'bearer' is inserted
 into the status.
 
 =back
 
 =head1 SEE ALSO
 
-L<Eulerian::Request>
+L<API::Eulerian::EDW::Request>
 
-L<Eulerian::Status>
+L<API::Eulerian::EDW::Status>
 
 =head1 AUTHOR
 
@@ -254,7 +254,7 @@ Xavier Thorillon <x.thorillon@eulerian.com>
 
 =head1 COPYRIGHT
 
-Copyright (c) 2008 Eulerian Technologies Ltd L<http://www.eulerian.com>
+Copyright (c) 2008 API::Eulerian::EDW Technologies Ltd L<http://www.eulerian.com>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
