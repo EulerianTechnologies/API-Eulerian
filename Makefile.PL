@@ -26,7 +26,8 @@ my %WriteMakefileArgs = (
     "Text::CSV" => 0,
     "Time::HiRes" => 0,
     "Switch" => 0,
-    "Protocol::WebSocket::Client" => 0
+    "Protocol::WebSocket::Client" => 0,
+    "File::Slurp" => 0,
   },
   "VERSION" => "0.01",
   "test" => {
