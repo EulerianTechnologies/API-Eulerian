@@ -15,23 +15,23 @@
 #
 # Setup module name
 #
-package Eulerian::Edw::Peer;
+package API::Eulerian::EDW::Peer;
 #
 # Enforce compilor rules
 #
 use strict; use warnings;
 #
-# Import Eulerian::Edw::Peers::Rest
+# Import API::Eulerian::EDW::Peer::Rest
 #
-use Eulerian::Edw::Peers::Rest;
+use API::Eulerian::EDW::Peer::Rest;
 #
-# Import Eulerian::Edw::Peers::Thin
+# Import API::Eulerian::EDW::Peer::Thin
 #
-use Eulerian::Edw::Peers::Thin;
+use API::Eulerian::EDW::Peer::Thin;
 #
-# Import Eulerian::Status
+# Import API::Eulerian::EDW::Status
 #
-use Eulerian::Status;
+use API::Eulerian::EDW::Status;
 #
 # @brief Allocate a new Eulerian Data Warehouse Peer.
 #
@@ -138,17 +138,17 @@ sub platform
   return $self->{ _PLATFORM };
 }
 #
-# @brief Hooks attribute accessors.
+# @brief Hook attribute accessors.
 #
 # @param $self - Eulerian Data Warehouse Peer.
-# @param $hooks - Eulerian Data Warehouse Peer Hooks.
+# @param $hook - Eulerian Data Warehouse Peer Hook.
 #
-# @return Eulerian Data Warehouse Peer Hooks.
+# @return Eulerian Data Warehouse Peer Hook.
 #
-sub hooks
+sub hook
 {
-  my ( $self, $hooks ) = @_;
-  $self->{ _HOOKS } = $hooks if defined( $hooks );
+  my ( $self, $hook ) = @_;
+  $self->{ _HOOKS } = $hook if defined( $hook );
   return $self->{ _HOOKS };
 }
 #
@@ -219,7 +219,7 @@ sub setup
 
   $self->kind( $setup->{ kind } ) if exists( $setup->{ kind } );
   $self->platform( $setup->{ platform } ) if exists( $setup->{ platform } );
-  $self->hooks( $setup->{ hooks } ) if exists( $setup->{ hooks } );
+  $self->hook( $setup->{ hook } ) if exists( $setup->{ hook } );
   $self->secure( $setup->{ secure } ) if exists( $setup->{ secure } );
   $self->token( $setup->{ token } ) if exists( $setup->{ token } );
   $self->grid( $setup->{ grid } ) if exists( $setup->{ grid } );
@@ -237,7 +237,7 @@ sub setup
 sub dump
 {
   my ( $self ) = @_;
-  my $hooks = $self->hooks() ? 'Set' : 'Unset';
+  my $hook = $self->hook() ? 'Set' : 'Unset';
   my $secure = $self->secure() ? 'True' : 'False';
   my $ports = $self->ports();
   my $dump = "\n";
@@ -248,7 +248,7 @@ sub dump
   $dump .= 'Class    : ' . $self->class() . "\n";
   $dump .= 'Kind     : ' . $self->kind() . "\n";
   $dump .= 'Platform : ' . $self->platform() . "\n";
-  $dump .= 'Hooks    : ' . $hooks . "\n";
+  $dump .= 'Hook    : ' . $hook . "\n";
   $dump .= 'Token    : ' . $self->token() . "\n";
   $dump .= 'Grid     : ' . $self->grid() . "\n";
   $dump .= 'Secure   : ' . $secure . "\n";
@@ -262,7 +262,7 @@ sub dump
 #
 # @param $self - Eulerian Data Warehouse Peer.
 #
-# @return Eulerian::Status. On success a new entry 'bearer' is inserted into
+# @return API::Eulerian::EDW::Status. On success a new entry 'bearer' is inserted into
 #         the Status.
 #
 sub _bearer
@@ -273,7 +273,7 @@ sub _bearer
 
   if( ! defined( $bearer ) ) {
     # Request Authority Services for a valid bearer
-    $status = Eulerian::Authority->bearer(
+    $status = API::Eulerian::EDW::Authority->bearer(
       $self->kind(), $self->platform(),
       $self->grid(), $self->ip(),
       $self->token()
@@ -282,7 +282,7 @@ sub _bearer
     $self->{ _BEARER } = $status->{ bearer } if ! $status->error();
   } else {
     # Return Cached bearer value
-    $status = Eulerian::Status->new();
+    $status = API::Eulerian::EDW::Status->new();
     $status->{ bearer } = $bearer;
   }
 
@@ -293,7 +293,7 @@ sub _bearer
 #
 # @param $self - Eulerian Data Warehouse Peer.
 #
-# @return Eulerian::Status. On success a new entry 'headers' is inserted into
+# @return API::Eulerian::EDW::Status. On success a new entry 'headers' is inserted into
 #         the status.
 #
 sub headers
@@ -304,7 +304,7 @@ sub headers
 
   if( ! $status->error() ) {
     # Create a new Object Headers
-    $headers = Eulerian::Request->headers();
+    $headers = API::Eulerian::EDW::Request->headers();
     # Setup Authorization Header value
     $headers->push_header( 'Authorization', $status->{ bearer } );
     # Setup reply context
@@ -322,7 +322,7 @@ sub headers
 # @param $self - Eulerian Data Warehouse Peer.
 # @param $command - Eulerian Data Warehouse Command.
 #
-# @return Eulerian::Status.
+# @return API::Eulerian::EDW::Status.
 #
 sub request
 {
@@ -334,7 +334,7 @@ sub request
 #
 # @param $self - Eulerian Data Warehouse Peer.
 #
-# @return Eulerian::Status
+# @return API::Eulerian::EDW::Status
 #
 sub cancel
 {
@@ -351,7 +351,7 @@ __END__
 
 =head1  NAME
 
-Eulerian::Edw::Peer - Eulerian Data Warehouse Peer module.
+API::Eulerian::EDW::Peer - Eulerian Data Warehouse Peer module.
 
 =head1 DESCRIPTION
 
@@ -361,7 +361,7 @@ This module is the base interface of an Eulerian Data Warehouse Peer.
 
 =head2 new()
 
-I<Allocate and initialize a new Eulerian::Edw::Peer instance.>
+I<Allocate and initialize a new API::Eulerian::EDW::Peer instance.>
 
 =head3 input
 
@@ -375,7 +375,7 @@ o kind : Eulerian Authority token kind.
 
 o platform : Eulerian Authority platform.
 
-o hooks : Eulerian::Edw::Hooks instance.
+o hook : API::Eulerian::EDW::Hook instance.
 
 o token : Eulerian customer token.
 
@@ -389,7 +389,7 @@ o ip : Eulerian customer IP.
 
 =over 4
 
-=item * Instance of an Eulerian::Edw::Peer.
+=item * Instance of an API::Eulerian::EDW::Peer.
 
 =back
 
@@ -429,7 +429,7 @@ I<Send command to Eulerian Data Warehouse Platform>
 
 =over 4
 
-=item * Eulerian::Status.
+=item * API::Eulerian::EDW::Status.
 
 =back
 
@@ -441,7 +441,7 @@ I<Cancel Eulerian Data Warehouse Job on Eulerian Data Warehouse Platform>
 
 =over 4
 
-=item * Eulerian::Status.
+=item * API::Eulerian::EDW::Status.
 
 =back
 
@@ -498,15 +498,15 @@ I<Get/Set Eulerian Authority platform.>
 
 =back
 
-=head2 hooks()
+=head2 hook()
 
-I<Get/Set Eulerian Data Warehouse Peer Hooks.>
+I<Get/Set Eulerian Data Warehouse Peer Hook.>
 
 =head3 input
 
 =over 4
 
-=item * kind - Eulerian Data Warehouse Peer Hooks.
+=item * kind - Eulerian Data Warehouse Peer Hook.
 
 =back
 
@@ -514,7 +514,7 @@ I<Get/Set Eulerian Data Warehouse Peer Hooks.>
 
 =over 4
 
-=item * Eulerian Data Warehouse Peer Hooks.
+=item * Eulerian Data Warehouse Peer Hook.
 
 =back
 
@@ -594,7 +594,7 @@ o kind : Eulerian Authority token kind.
 
 o platform : Eulerian Authority platform.
 
-o hooks : Eulerian::Edw::Hooks instance.
+o hook : API::Eulerian::EDW::Hook instance.
 
 o token : Eulerian customer token.
 

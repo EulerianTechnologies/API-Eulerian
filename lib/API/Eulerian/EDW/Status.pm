@@ -3,7 +3,7 @@
 #
 # @file Status.pm
 #
-# @brief Eulerian Status used to return function error to the callers
+# @brief API::Eulerian::EDW Status used to return function error to the callers
 #
 # @author Thorillon Xavier:x.thorillon@eulerian.com
 #
@@ -15,17 +15,17 @@
 #
 # Setup perl package name
 #
-package Eulerian::Status;
+package API::Eulerian::EDW::Status;
 #
 # Enforce compilor rules
 #
 use strict; use warnings;
 #
-# @brief Allocate and initialize a new Eulerian::Status instance.
+# @brief Allocate and initialize a new API::Eulerian::EDW::Status instance.
 #
-# @param $class - Eulerian::Status class.
+# @param $class - API::Eulerian::EDW::Status class.
 #
-# @return Eulerian::Status instance.
+# @return API::Eulerian::EDW::Status instance.
 #
 sub new
 {
@@ -40,7 +40,7 @@ sub new
 #
 # @brief Get/Set error message.
 #
-# @param $self - Eulerian::Status instance.
+# @param $self - API::Eulerian::EDW::Status instance.
 # @param $msg - Error message.
 #
 # @return Error message.
@@ -54,7 +54,7 @@ sub msg
 #
 # @brief Get/Set error code.
 #
-# @param $self - Eulerian::Status instance.
+# @param $self - API::Eulerian::EDW::Status instance.
 # @param $code - Error code.
 #
 # @return Error code.
@@ -68,7 +68,7 @@ sub code
 #
 # @brief Get/Set error.
 #
-# @param $self - Eulerian::Status instance.
+# @param $self - API::Eulerian::EDW::Status instance.
 # @param $error - Error.
 #
 # @return Error flag.
@@ -82,7 +82,7 @@ sub error
 #
 # @brief Dump status.
 #
-# @param $self - Eulerian::Status.
+# @param $self - API::Eulerian::EDW::Status.
 #
 sub dump
 {
@@ -108,7 +108,7 @@ __END__
 
 =head1  NAME
 
-Eulerian::Status - Eulerian Status module.
+API::Eulerian::EDW::Status - API::Eulerian::EDW Status module.
 
 =head1 DESCRIPTION
 
@@ -118,13 +118,13 @@ This module provide a Perl Status object used as return to function calls.
 
 =head2 new()
 
-I<Create a new Eulerian::Status instance.>
+I<Create a new API::Eulerian::EDW::Status instance.>
 
 =head3 output
 
 =over 4
 
-=item * Instance of an Eulerian::Status.
+=item * Instance of an API::Eulerian::EDW::Status.
 
 =back
 
@@ -198,7 +198,7 @@ Xavier Thorillon <x.thorillon@eulerian.com>
 
 =head1 COPYRIGHT
 
-Copyright (c) 2008 Eulerian Technologies Ltd L<http://www.eulerian.com>
+Copyright (c) 2008 API::Eulerian::EDW Technologies Ltd L<http://www.eulerian.com>
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

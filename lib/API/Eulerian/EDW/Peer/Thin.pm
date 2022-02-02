@@ -18,23 +18,23 @@
 #
 # Setup module name
 #
-package Eulerian::Edw::Peers::Thin;
+package API::Eulerian::EDW::Peer::Thin;
 #
 # Enforce compilor rules
 #
 use strict; use warnings;
 #
-# Inherited interface from Eulerian::Edw::Peer
+# Inherited interface from API::Eulerian::EDW::Peer
 #
-use parent 'Eulerian::Edw::Peer';
+use parent 'API::Eulerian::EDW::Peer';
 #
-# Import Eulerian::WebSocket
+# Import API::Eulerian::EDW::WebSocket
 #
-use Eulerian::WebSocket;
+use API::Eulerian::EDW::WebSocket;
 #
-# Import Eulerian::Bench
+# Import API::Eulerian::EDW::Bench
 #
-use Eulerian::Bench;
+use API::Eulerian::EDW::Bench;
 #
 # Import Switch
 #
@@ -57,7 +57,7 @@ sub new
   my $self;
 
   # Call base instance constructor
-  $self = $class->SUPER::create( 'Eulerian::Edw::Peers::Thin' );
+  $self = $class->SUPER::create( 'API::Eulerian::EDW::Peer::Thin' );
 
   # Setup Default host value
   $self->host( 'edwaro' );
@@ -141,13 +141,13 @@ sub create
   $status = $self->headers();
   if( ! $status->error() ) {
     # Post new JOB to Eulerian Data Warehouse Platform
-    $status = Eulerian::Request->post(
+    $status = API::Eulerian::EDW::Request->post(
       $self->url(), $status->{ headers }, $command, 'text/plain'
       );
     if( ! $status->error() ) {
-      my $json = Eulerian::Request->json( $status->{ response } );
+      my $json = API::Eulerian::EDW::Request->json( $status->{ response } );
       if( defined( $json ) && $json->{ status }->[ 1 ] != 0 ) {
-        $status = Eulerian::Status->new();
+        $status = API::Eulerian::EDW::Status->new();
         $status->error( 1 );
         $status->msg( $json->{ status }->[ 0 ] );
         $status->code( $json->{ status }->[ 1 ] );
@@ -209,7 +209,7 @@ sub dispatcher
 # @brief Join Websocket stream, raise callback hooks accordingly to received
 #        messages types.
 #
-# @param $self - Eulerian::Edw::Peers:Thin instance.
+# @param $self - API::Eulerian::EDW::Peer:Thin instance.
 # @param $rc - Reply context of JOB creation.
 #
 # @return Reply context.
@@ -217,8 +217,8 @@ sub dispatcher
 sub join
 {
   my ( $self, $status ) = @_;
-  my $json = Eulerian::Request->json( $status->{ response } );
-  my $ws = Eulerian::WebSocket->new(
+  my $json = API::Eulerian::EDW::Request->json( $status->{ response } );
+  my $ws = API::Eulerian::EDW::WebSocket->new(
     $self->host(), $self->ports()->[ $self->secure() ]
     );
   my $url = $self->url( $json->{ aes } );
@@ -234,7 +234,7 @@ sub join
 sub request
 {
   my ( $self, $command ) = @_;
-  my $bench = new Eulerian::Bench();
+  my $bench = new API::Eulerian::EDW::Bench();
   my $response;
   my $status;
   my $json;
@@ -257,7 +257,7 @@ sub request
 #
 # @brief Cancel Job on Eulerian Data Warehouse Platform.
 #
-# @param $self - Eulerian::Edw::Peers::Rest instance.
+# @param $self - API::Eulerian::EDW::Peer::Rest instance.
 # @param $rc - Reply context.
 #
 sub cancel
@@ -272,7 +272,7 @@ sub cancel
     my $command = "KILL $uuid;";
 
     # Post new JOB to Eulerian Data Warehouse Platform
-    $status = Eulerian::Request->post(
+    $status = API::Eulerian::EDW::Request->post(
       $self->url(), $status->{ headers }, $command, 'text/plain'
       );
 

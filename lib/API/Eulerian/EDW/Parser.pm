@@ -17,19 +17,19 @@
 #
 # Setup module name
 #
-package Eulerian::Edw::Parser;
+package API::Eulerian::EDW::Parser;
 #
 # Enforce compilor rules
 #
 use strict; use warnings;
 #
-# @brief Allocate and initialize a new Eulerian::Edw::Parser instance.
+# @brief Allocate and initialize a new API::Eulerian::EDW::Parser instance.
 #
-# @param $class - Eulerian::Edw::Parser class.
+# @param $class - API::Eulerian::EDW::Parser class.
 # @param $path - Input file path.
 # @param $uuid - Eulerian Data Warehouse Analysis UUID.
 #
-# @return Eulerian::Edw::Parser instance.
+# @return API::Eulerian::EDW::Parser instance.
 #
 sub new
 {
@@ -42,7 +42,7 @@ sub new
 #
 # @brief Get/Set Eulerian Data Warehouse Analysis UUID.
 #
-# @param $self - Eulerian::Edw::Parser instance.
+# @param $self - API::Eulerian::EDW::Parser instance.
 # @param $uuid - Eulerian Data Warehouse Analysis UUID.
 #
 # @return Eulerian Data Warehouse Analysis UUID.
@@ -56,7 +56,7 @@ sub uuid
 #
 # @brief Get/Set Input file path.
 #
-# @parm $self - Eulerian::Edw::Parser instance.
+# @parm $self - API::Eulerian::EDW::Parser instance.
 #
 # @return Input file path.
 #
@@ -67,10 +67,10 @@ sub path
   return $self->{ _PATH };
 }
 #
-# @brief Parse input file path and call user specific hooks.
+# @brief Parse input file path and call user specific hook.
 #
-# @param $self - Eulerian::Edw::Parser instance.
-# @param $hooks - Eulerian::Edw::Hooks instance.
+# @param $self - API::Eulerian::EDW::Parser instance.
+# @param $hook - API::Eulerian::EDW::Hook instance.
 #
 sub do {}
 #
@@ -84,7 +84,7 @@ __END__
 
 =head1  NAME
 
-Eulerian::Edw::Hooks - Eulerian Data Warehouse Hooks module.
+API::Eulerian::EDW::Hook - Eulerian Data Warehouse Hook module.
 
 =head1 DESCRIPTION
 
@@ -94,7 +94,7 @@ This module is the base interface of an input file parser.
 
 =head2 new()
 
-I<Allocate and initialize a new Eulerian::Edw::Hooks instance.>
+I<Allocate and initialize a new API::Eulerian::EDW::Hook instance.>
 
 =head3 input
 
@@ -110,7 +110,7 @@ I<Allocate and initialize a new Eulerian::Edw::Hooks instance.>
 
 =over 4
 
-=item * Instance of an Eulerian::Edw::Parser.
+=item * Instance of an API::Eulerian::EDW::Parser.
 
 =back
 
@@ -156,13 +156,13 @@ I<Get/Set input file path.>
 
 =head2 do()
 
-I<Parse input file path, call user specific hooks.>
+I<Parse input file path, call user specific hook.>
 
 =head3 input
 
 =over 4
 
-=item * hooks - Eulerian::Edw::Hooks instance.
+=item * hook - API::Eulerian::EDW::Hook instance.
 
 =back
 

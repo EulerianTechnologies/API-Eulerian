@@ -1,12 +1,12 @@
 #/usr/bin/env perl
 ###############################################################################
 #
-# @file Hooks.pm
+# @file Hook.pm
 #
-# @brief Eulerian Data Warehouse Peer Hooks Base class Module definition.
+# @brief Eulerian Data Warehouse Peer Hook Base class Module definition.
 #
 # This module is aimed to provide callback hooks userfull to process reply data.
-# Library user can create is own Hooks class conforming to this module interface
+# Library user can create is own Hook class conforming to this module interface
 # to handle reply data in specific manner.
 #
 # @author Thorillon Xavier:x.thorillon@eulerian.com
@@ -19,18 +19,18 @@
 #
 # Setup module name
 #
-package Eulerian::Edw::Hooks;
+package API::Eulerian::EDW::Hook;
 #
 # Enforce compilor rules
 #
 use strict; use warnings;
 #
-# @brief Allocate a new Eulerian Data Warehouse Peer Hooks.
+# @brief Allocate a new Eulerian Data Warehouse Peer Hook.
 #
-# @param $class - Eulerian Data Warehouse Peer Hooks Class.
+# @param $class - Eulerian Data Warehouse Peer Hook Class.
 # @param $setup - Setup attributes.
 #
-# @return Eulerian Data Warehouse Peer Hooks instance.
+# @return Eulerian Data Warehouse Peer Hook instance.
 #
 sub new
 {
@@ -40,9 +40,9 @@ sub new
   return $self;
 }
 #
-# @brief Setup Eulerian Data Warehouse Peer Hooks.
+# @brief Setup Eulerian Data Warehouse Peer Hook.
 #
-# @param $self - Eulerian Data Warehouse Peer Hooks.
+# @param $self - Eulerian Data Warehouse Peer Hook.
 # @param $setup - Setup entries.
 #
 sub setup
@@ -52,7 +52,7 @@ sub setup
 #
 # @brief
 #
-# @param $self - Eulerian Data Warehouse Peer Hooks.
+# @param $self - Eulerian Data Warehouse Peer Hook.
 # @param $uuid - UUID of Eulerian Analytics Analysis.
 # @param $start - Timerange begin.
 # @param $end - Timerange end.
@@ -65,7 +65,7 @@ sub on_headers
 #
 # @brief
 #
-# @param $self - Eulerian Data Warehouse Peer Hooks.
+# @param $self - Eulerian Data Warehouse Peer Hook.
 # @param $uuid - UUID of Eulerian Analytics Analysis.
 # @param $rows - Array of Array of Columns values.
 #
@@ -76,7 +76,7 @@ sub on_add
 #
 # @brief
 #
-# @param $self - Eulerian Data Warehouse Peer Hooks.
+# @param $self - Eulerian Data Warehouse Peer Hook.
 # @param $uuid - UUID of Eulerian Analytics Analysis.
 # @param $rows - Array of Array of Columns values.
 #
@@ -87,7 +87,7 @@ sub on_replace
 #
 # @brief
 #
-# @param $self - Eulerian Data Warehouse Peer Hooks.
+# @param $self - Eulerian Data Warehouse Peer Hook.
 # @param $uuid - UUID of Eulerian Analytics Analysis.
 # @param $progress - Progression value.
 #
@@ -98,7 +98,7 @@ sub on_progress
 #
 # @brief
 #
-# @param $self - Eulerian Data Warehouse Peer Hooks.
+# @param $self - Eulerian Data Warehouse Peer Hook.
 # @param $uuid - UUID of Eulerian Analytics Analysis.
 # @param $token - AES Token or Bearer.
 # @param $errnum - Error number.
@@ -120,7 +120,7 @@ __END__
 
 =head1  NAME
 
-Eulerian::Edw::Hooks - Eulerian Data Warehouse Peer Hooks module.
+API::Eulerian::EDW::Hook - Eulerian Data Warehouse Peer Hook module.
 
 =head1 DESCRIPTION
 
@@ -132,13 +132,13 @@ interface. It permits to process reply data in a specific manner.
 
 =head2 new()
 
-I<Create a new instance of Eulerian Data Warehouse Peer Hooks>
+I<Create a new instance of Eulerian Data Warehouse Peer Hook>
 
 =head3 input
 
 =over 4
 
-=item * setup - Hash reference of Hooks parameters.
+=item * setup - Hash reference of Hook parameters.
 
 =back
 
@@ -146,19 +146,19 @@ I<Create a new instance of Eulerian Data Warehouse Peer Hooks>
 
 =over 4
 
-=item * Eulerian::Edw::Hooks instance.
+=item * API::Eulerian::EDW::Hook instance.
 
 =back
 
 =head2 setup()
 
-I<Setup Eulerian Data Warehouse Peer Hooks>
+I<Setup Eulerian Data Warehouse Peer Hook>
 
 =head3 input
 
 =over 4
 
-=item * setup - Hash reference of Hooks parameters.
+=item * setup - Hash reference of Hook parameters.
 
 =back
 
