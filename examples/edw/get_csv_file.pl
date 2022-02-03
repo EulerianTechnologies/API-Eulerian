@@ -22,8 +22,7 @@ use Pod::Usage();
 use Getopt::Long();
 use HTTP::Tiny();
 
-use API::Eulerian::EDW::Peer::Rest();
-use API::Eulerian::EDW::Hook::Print();
+use API::Eulerian::EDW();
 
 my ($grid,$ip,$token,$help,$site,$query) = ('','','','','',0);
 
@@ -82,29 +81,18 @@ $cmd =~ s/\[% DATE_TO %\]/$date_to/gm;
 # Create a user specific Hook used to handle Analysis replies.
 #
 
-$h_setup{hook} = new API::Eulerian::EDW::Hook::Print();
+my $edw = new API::Eulerian::EDW();
+my $rh_ret = $edw->get_csv_file( \%h_setup, $cmd );
 
-my $peer = new API::Eulerian::EDW::Peer::Rest(\%h_setup);
-my $status = $peer->request( $cmd );
-
-if ( $status->error() ) {
-  $status->dump();
-  exit(1);
-}
-
-# Dump stages durations
-$status->{ bench }->dump();
-
-# Cancel the command
-$peer->cancel();
-
+use Data::Dumper;
+print Dumper($rh_ret);
 
 1;
 __END__
 
 =head1 NAME
 
- Rest.pl - Sample EDW script for querying through REST
+ get_csv_file.pl - Sample EDW script for querying through REST and get a CSV file
 
 =head1 SYNOPSIS
 

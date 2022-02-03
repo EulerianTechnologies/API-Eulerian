@@ -43,6 +43,7 @@ my %KINDS = (
   'session' => '/er/account/get_dw_session_token.json?ip=',
   'access'  => '/er/account/get_dw_access_token.json?ip=',
 );
+
 #
 # @brief Get valid HTTP Authorization bearer used to access API::Eulerian::EDW
 #        Data Warehouse Platform.

@@ -18,51 +18,24 @@
 #
 # Setup module name
 #
-package API::Eulerian::EDW::Rest;
-#
-# Enforce compilor rules
-#
-use strict; use warnings;
-#
-# Inherited interface from API::Eulerian::EDW::Peer
-#
-use parent 'API::Eulerian::EDW::Peer';
-#
-# Import API::Eulerian::EDW::Authority
-#
-use API::Eulerian::EDW::Authority;
-#
-# Import API::Eulerian::EDW::File
-#
-use API::Eulerian::EDW::File;
-#
-# Import API::Eulerian::EDW::Status
-#
-use API::Eulerian::EDW::Status;
-#
-# Import API::Eulerian::EDW::Parser::JSON
-#
-use API::Eulerian::EDW::Parser::JSON;
-#
-# Import API::Eulerian::EDW::Parser::CSV
-#
-use API::Eulerian::EDW::Parser::CSV;
-#
-# Import Hostname
-#
-use Sys::Hostname;
-#
-# Import strftime()
-#
-use POSIX 'strftime';
-#
-# Import encode_json()
-#
-use JSON 'encode_json';
-#
-# Import API::Eulerian::EDW::Bench
-#
-use API::Eulerian::EDW::Bench;
+package API::Eulerian::EDW::Peer::Rest;
+
+use strict;
+
+use JSON();
+use POSIX();
+use Sys::Hostname();
+
+use API::Eulerian::EDW::Peer();
+use API::Eulerian::EDW::File();
+use API::Eulerian::EDW::Bench();
+use API::Eulerian::EDW::Status();
+use API::Eulerian::EDW::Authority();
+use API::Eulerian::EDW::Parser::JSON();
+use API::Eulerian::EDW::Parser::CSV();
+
+our @ISA = qw/ API::Eulerian::EDW::Peer /;
+
 #
 # Defines Parser class name matching format.
 #
@@ -80,22 +53,22 @@ my %PARSERS = (
 #
 sub new
 {
-  my ( $class, $setup ) = @_;
-  my $self;
+  my $proto = shift();
+  my $class = ref($proto) || $proto;
+  my $setup = shift() || {};
 
-  # Call base instance constructor
-  $self = $class->SUPER::create( 'API::Eulerian::EDW::Rest' );
+  my $self = $class->SUPER::new();
 
   # Setup Rest Peer Default attributes values
-  $self->{ _ACCEPT } = 'application/json';
+  $self->{ _ACCEPT } = $setup->{accept} || 'application/json';
   $self->{ _ENCODING } = 'gzip';
-  $self->{ _WDIR } = '.';
+  $self->{ _WDIR } = '/tmp';
   $self->{ _UUID } = 0;
 
   # Setup Rest Peer Attributes
   $self->setup( $setup );
 
-  return $self;
+  return bless($self, $class);
 }
 #
 # @brief UUID attribute accessors.
@@ -171,6 +144,7 @@ sub setup
   $self->encoding( $setup->{ encoding } ) if exists( $setup->{ encoding } );
   $self->wdir( $setup->{ wdir } ) if exists( $setup->{ wdir } );
 
+  return $self;
 }
 #
 # @brief Dump Eulerian Data Warehouse Peer setup.
@@ -186,6 +160,7 @@ sub dump
   $dump .= 'Encoding : ' . $self->encoding() . "\n";
   $dump .= 'WorkDir  : ' . $self->wdir() . "\n\n";
   print( $dump );
+  return $self;
 }
 #
 # @brief Get remote URL to Eulerian Data Warehouse Platform.
@@ -229,14 +204,14 @@ sub url
 sub body
 {
   my ( $self, $command ) = @_;
-  my %body = (
+  $command =~ s/\n//gm;
+  return JSON::encode_json({
     kind => 'edw#request',
     query => $command,
-    creationTime => strftime( '%d/%m/%Y %H:%M:%S', gmtime() ),
-    location => hostname(),
+    creationTime => POSIX::strftime( '%d/%m/%Y %H:%M:%S', gmtime() ),
+    location => Sys::Hostname::hostname(),
     expiration => undef,
-  );
-  return encode_json( \%body );
+  });
 };
 #
 # @brief Setup HTTP Request Headers.
@@ -268,7 +243,6 @@ sub headers
 #
 # @return Reply content.
 #
-use Data::Dumper;
 sub create
 {
   my ( $self, $command ) = @_;
@@ -465,7 +439,7 @@ sub download
   return $status;
 }
 #
-# @brief Parse local file path and invoke hooks handlers.
+# @brief Parse local file path and invoke hook handlers.
 #
 # @param $self - API::Eulerian::EDW::Rest instance.
 # @param $rc - Reply context.
@@ -474,12 +448,13 @@ sub download
 #
 sub parse
 {
-  my $pattern = '[0-9]*\.(json|csv|parquet)';
   my ( $self, $status ) = @_;
   my $path = $status->{ path };
   my $parser;
   my $name;
   my %rc;
+
+  my $pattern = '[0-9]*\.(json|csv|parquet)';
 
   # Parse file path, get file type
   if( ( $path =~ m/$pattern/ ) ) {
@@ -487,8 +462,8 @@ sub parse
     if( ( $name = $PARSERS{ $1 } ) ) {
       # Create new instance of Parser
       if( ( $parser = $name->new( $path, $self->uuid() ) ) ) {
-        # Parse reply file raise callback hooks
-        $parser->do( $self->hooks() );
+        # Parse reply file raise callback hook
+        $parser->do( $self->hook() );
       } else {
         $status->error( 1 );
         $status->msg( "Failed to create Parser" );
