@@ -12,26 +12,12 @@
 # @version 1.0
 #
 ###############################################################################
-#
-# Setup module name
-#
 package API::Eulerian::EDW::Peer;
-#
-# Enforce compilor rules
-#
-use strict; use warnings;
-#
-# Import API::Eulerian::EDW::Peer::Rest
-#
-use API::Eulerian::EDW::Peer::Rest;
-#
-# Import API::Eulerian::EDW::Peer::Thin
-#
-use API::Eulerian::EDW::Peer::Thin;
-#
-# Import API::Eulerian::EDW::Status
-#
-use API::Eulerian::EDW::Status;
+
+use strict;
+
+use API::Eulerian::EDW::Status();
+
 #
 # @brief Allocate a new Eulerian Data Warehouse Peer.
 #
@@ -42,35 +28,23 @@ use API::Eulerian::EDW::Status;
 #
 sub new
 {
-  my ( $class, $setup ) = @_;
-  $class = $setup->{ class };
-  return $class->new( $setup );
+  my $proto = shift();
+  my $class = ref($proto) || $proto;
+  my $setup = shift() || {};
+  return bless({
+    _CLASS      => $class,
+    _KIND       => 'access',
+    _PLATFORM   => 'fr',
+    _HOOKS      => undef,
+    _TOKEN      => undef,
+    _GRID       => undef,
+    _HOST       => undef,
+    _PORTS      => [ 80, 443 ],
+    _SECURE     => 1,
+    _IP         => undef
+  });
 }
-#
-# @brief Create a new Eulerian Data Warehouse Peer instance.
-#
-# @param $class - Eulerian Data Warehouse Peer class.
-# @param $name - Eulerian Data Warehouse Peer class name.
-#
-# @return New Eulerian Data Warehouse Peer Instance.
-#
-sub create
-{
-  my $class = shift;
-  my $self = bless ( {
-    _CLASS => shift,
-    _KIND => 'access',
-    _PLATFORM => 'fr',
-    _HOOKS => undef,
-    _TOKEN => undef,
-    _GRID => undef,
-    _HOST => undef,
-    _PORTS => [ 80, 443 ],
-    _SECURE => 1,
-    _IP => undef,
-  }, $class );
-  return $self;
-}
+
 #
 # @brief Class attribute getter.
 #
@@ -217,18 +191,16 @@ sub setup
 {
   my ( $self, $setup ) = @_;
 
-  $self->kind( $setup->{ kind } ) if exists( $setup->{ kind } );
-  $self->platform( $setup->{ platform } ) if exists( $setup->{ platform } );
-  $self->hook( $setup->{ hook } ) if exists( $setup->{ hook } );
-  $self->secure( $setup->{ secure } ) if exists( $setup->{ secure } );
-  $self->token( $setup->{ token } ) if exists( $setup->{ token } );
-  $self->grid( $setup->{ grid } ) if exists( $setup->{ grid } );
-  $self->ip( $setup->{ ip } ) if exists( $setup->{ ip } );
-  $self->host( $setup->{ host } ) if exists( $setup->{ host } );
-  $self->ports( $setup->{ ports } ) if exists( $setup->{ ports } );
-  $self->dump();
+  foreach my $param ( qw/
+    kind platform hook secure token grid ip host ports / ) {
+    if ( $self->can($param) && exists $setup->{ $param } ) {
+      $self->$param( $setup->{$param} );
+    }
+  }
 
+  return $self;
 }
+
 #
 # @brief Dump Eulerian Data Warehouse Peer settings.
 #
@@ -255,7 +227,7 @@ sub dump
   $dump .= 'Ip       : ' . $self->ip() . "\n";
 
   print( $dump );
-
+  return $self;
 }
 #
 # @brief Get Authorization bearer value from Eulerian Authority Services.
@@ -277,7 +249,8 @@ sub _bearer
       $self->kind(), $self->platform(),
       $self->grid(), $self->ip(),
       $self->token()
-      );
+    );
+
     # Cache bearer value for next use
     $self->{ _BEARER } = $status->{ bearer } if ! $status->error();
   } else {
@@ -315,34 +288,7 @@ sub headers
 
   return $status;
 }
-#
-# @brief Interface definition of the function used to request Eulerian Data
-#        Warehouse Platform.
-#
-# @param $self - Eulerian Data Warehouse Peer.
-# @param $command - Eulerian Data Warehouse Command.
-#
-# @return API::Eulerian::EDW::Status.
-#
-sub request
-{
-  my ( $self, $command ) = @_;
-}
-#
-# @brief Interface definition of the function used to cancel a request on
-#        Eulerian Data Warehouse Platform.
-#
-# @param $self - Eulerian Data Warehouse Peer.
-#
-# @return API::Eulerian::EDW::Status
-#
-sub cancel
-{
-  my ( $self ) = @_;
-}
-#
-# Endup module properly
-#
+
 1;
 
 __END__

@@ -95,6 +95,11 @@ sub do
   my @rows;
   my $line;
 
+  # in case of Noop - do not do any treatment on returned data - exit
+  if ( $hooks eq 'API::Eulerian::EDW::Hook::Noop' ) {
+    return;
+  }
+
   # Process Headers line
   $line = <$file>; chomp $line;
   if( $parser->parse( $line ) ) {

@@ -15,18 +15,17 @@
 # @version 1.0
 #
 ###############################################################################
-#
-# Setup module name
-#
-package API::Eulerian::EDW::Hook::Print;
-#
-# Enforce compilor rules
-#
-use strict; use warnings;
+package API::Eulerian::EDW::Hook::Noop;
+use strict;
 #
 # Inherited interface from API::Eulerian::EDW::Hook
 #
-use parent 'API::Eulerian::EDW::Hook';
+#use parent 'API::Eulerian::EDW::Hook';
+
+use API::Eulerian::EDW::Hook();
+
+our @ISA = qw/ API::Eulerian::EDW::Hook /;
+
 #
 # @brief Allocate a new Eulerian Data Warehouse Peer Hook.
 #
@@ -63,25 +62,6 @@ sub setup
 sub on_headers
 {
   my ( $self, $uuid, $start, $end, $columns ) = @_;
-  my $string = <<string_end;
-  {
-    . UUID      : $uuid
-    . TIMERANGE : {
-        begin : $start,
-        end : $end,
-      },
-    . HEADERS   : {
-string_end
-  foreach my $column ( @$columns ) {
-    if( ref( $column ) eq 'ARRAY' ) {
-      $string .= "        $column->[ 0 ] : $column->[ 1 ],\n";
-    } else {
-      # Thin Peer doesnt return columns types
-      $string .= "               UNKNOWN : $column,\n";
-    }
-  }
-  $string .= "      },\n  }\n";
-  print( $string );
   return $self;
 }
 #
@@ -94,17 +74,7 @@ string_end
 sub on_add
 {
   my ( $self, $uuid, $rows ) = @_;
-  my $string = '';
-
-  for my $row ( @$rows ) {
-    for my $col ( @$row ) {
-      $col = '' if ( !defined $col );
-      $string .= "$col | ";
-    }
-    $string .= "\n";
-  }
-  print( $string );
-
+  return $self;
 }
 #
 # @brief Analysis reply rows on Distinct/Pivot analysis.
@@ -116,16 +86,7 @@ sub on_add
 sub on_replace
 {
   my ( $self, $uuid, $rows ) = @_;
-  my $string = '';
-
-  for my $row ( @$rows ) {
-    for my $col ( @$row ) {
-      $col = '' if ( !defined $col );
-      $string .= "$col | ";
-    }
-    $string .= "\n";
-  }
-  print( $string );
+  return $self;
 
 }
 #
@@ -138,7 +99,6 @@ sub on_replace
 sub on_progress
 {
   my ( $self, $uuid, $progress ) = @_;
-  print( "PROGRESSION : $progress\n" );
   return $self;
 }
 #
@@ -154,13 +114,6 @@ sub on_progress
 sub on_status
 {
   my ( $self, $uuid, $token, $errnum, $err, $updated ) = @_;
-  #  my $string = <<string_end;
-  #  $uuid : {
-  #   error_code => $errnum,
-  #   error_msg => $err,
-  #  }
-  #string_end
-  #print( $string );
   return $self;
 }
 

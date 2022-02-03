@@ -79,6 +79,11 @@ sub error
   $self->{ _ERROR } = $error if defined( $error );
   return $self->{ _ERROR };
 }
+sub path
+{
+  my $self = shift;
+  return $self->{ path };
+}
 #
 # @brief Dump status.
 #

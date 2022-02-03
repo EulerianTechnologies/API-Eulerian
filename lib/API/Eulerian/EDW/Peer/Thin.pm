@@ -159,12 +159,11 @@ sub create
 }
 #
 # @brief Dispatch Eulerian Data Warehouse Analytics Analysis result messages to
-#        their matching callback hooks.
+#        their matching callback hook.
 #
 # @param $ws - Eulerian WebSocket.
 # @param $buf - Received buffer.
 #
-use Data::Dumper;
 sub dispatcher
 {
   my ( $ws, $buf ) = @_;
@@ -172,31 +171,31 @@ sub dispatcher
   my $type = $json->{ message };
   my $uuid = $json->{ uuid };
   my $self = $ws->{ _THIN };
-  my $hooks = $self->hooks();
+  my $hook = $self->hook();
   my $rows = $json->{ rows };
 
   switch( $type ) {
     case 'add' {
-      $hooks->on_add( $json->{ uuid }, $json->{ rows } );
+      $hook->on_add( $json->{ uuid }, $json->{ rows } );
     }
     case 'replace' {
-      $hooks->on_replace( $json->{ uuid }, $json->{ rows } );
+      $hook->on_replace( $json->{ uuid }, $json->{ rows } );
     }
     case 'headers' {
       #print Dumper( $json ) . "\n";
       $self->{ uuid } = $uuid;
-      $hooks->on_headers(
+      $hook->on_headers(
         $json->{ uuid }, $json->{ timerange }->[ 0 ],
         $json->{ timerange }->[ 1 ], $json->{ columns }
       );
     }
     case 'progress' {
-      $hooks->on_progress(
+      $hook->on_progress(
         $json->{ uuid }, $json->{ progress }
       );
     }
     case 'status' {
-      $hooks->on_status(
+      $hook->on_status(
         $json->{ uuid }, $json->{ aes }, $json->{ status }->[ 1 ],
         $json->{ status }->[ 0 ], $json->{ status }->[ 2 ]
       );
@@ -206,7 +205,7 @@ sub dispatcher
 
 }
 #
-# @brief Join Websocket stream, raise callback hooks accordingly to received
+# @brief Join Websocket stream, raise callback hook accordingly to received
 #        messages types.
 #
 # @param $self - API::Eulerian::EDW::Peer:Thin instance.
@@ -245,7 +244,7 @@ sub request
   $bench->stage( 'create' );
 
   if( ! $status->error() ) {
-    # Join Websocket call user specific callback hooks
+    # Join Websocket call user specific callback hook
     $bench->start();
     $status = $self->join( $status );
     $bench->stage( 'join' );
