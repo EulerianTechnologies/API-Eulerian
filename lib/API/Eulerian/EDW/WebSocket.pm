@@ -187,7 +187,6 @@ sub join
       $read = $socket->sysread( $buf, $bufsize, $offset );
       if( $read > 0 ) {
         $peer->read( $buf );
-        undef $buf;
       } else {
         close( $socket );
         undef( $socket );
