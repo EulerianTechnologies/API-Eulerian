@@ -111,8 +111,12 @@ sub json
     $data = $response->decoded_content;
     if( defined( $data ) ) {
       chomp( $data );
-      $data = encode( 'utf-8', $data );
-      $data = decode_json( $data );
+      if( length( $data ) > 0 ) {
+        $data = encode( 'utf-8', $data );
+        $data = decode_json( $data );
+       } else {
+        $data = undef;
+       }
     }
   }
 
@@ -218,6 +222,9 @@ sub _request
       );
   } else {
     $status->{ response } = $response;
+    if( defined( $response->header( 'content-encoding' ) ) ) {
+      $status->{ encoding } = $response->header( 'content-encoding' );
+    }
   }
 
   return $status;
