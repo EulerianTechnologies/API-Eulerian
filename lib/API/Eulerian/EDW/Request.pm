@@ -162,6 +162,7 @@ sub post
 #
 # @return API::Eulerian::EDW::Status instance.
 #
+use Data::Dumper;
 sub _request
 {
   my ( $class, $method, $url, $headers, $what, $type, $file ) = @_;
@@ -200,6 +201,8 @@ sub _request
       SSL_hostname              => '',
     },
   );
+
+  $endpoint->timeout( 1800 );
 
   # Send Request, wait response if file is defined reply content is
   # writen into local file.
