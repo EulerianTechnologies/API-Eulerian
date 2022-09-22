@@ -209,8 +209,6 @@ sub _request
   # Increase Read Timeout on TCP socket to avoid being disconnected
   $endpoint->timeout( 1800 );
 
-  $endpoint->timeout( 1800 );
-
   # Send Request, wait response if file is defined reply content is
   # writen into local file.
   my $response = $endpoint->request( $request, $file );
