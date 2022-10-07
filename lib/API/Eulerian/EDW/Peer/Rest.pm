@@ -429,7 +429,7 @@ sub download
       # Handle errors
       if( ! $status->error() ) {
         my $encoding = $status->{ 'encoding' };
-        if( defined( $encoding ) && ( $encoding == 'gzip' ) ) {
+        if( defined( $encoding ) && ( $encoding eq 'gzip' ) ) {
           rename $path, "$path.gz";
           $status->{ path } = $self->unzip( "$path.gz" );
         } else {
