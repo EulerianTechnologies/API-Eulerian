@@ -338,7 +338,6 @@ sub done
 sub path
 {
   my ( $self, $response ) = @_;
-  my $encoding = $self->encoding();
   my $json = API::Eulerian::EDW::Request->json( $response );
   my $pattern = '([0-9]*)\.(json|csv|parquet)';
   my $status = API::Eulerian::EDW::Status->new();
@@ -415,8 +414,7 @@ sub download
   if( ! $status->{ error } ) {
     my $path = $status->{ path };
     my $url = $status->{ url };
-    my $response;
-
+    
     # Get HTTP request headers
     $status = $self->headers();
 
@@ -428,7 +426,10 @@ sub download
         );
       # Handle errors
       if( ! $status->error() ) {
-        my $encoding = $status->{ 'encoding' };
+        my $response = $status->{ response };
+        my $headers = $response->{ _headers };
+        my $encoding = $headers->{ 'content-encoding' };
+        
         if( defined( $encoding ) && ( $encoding eq 'gzip' ) ) {
           rename $path, "$path.gz";
           $status->{ path } = $self->unzip( "$path.gz" );
