@@ -1,0 +1,39 @@
+{
+   "abstract" : "Simple interface for all the API provided by Eulerian Technologies.",
+   "author" : [
+      "Mathieu Jondet <mathieu@eulerian.com>, Xavier Thorillon <xavier@eulerian.com>"
+   ],
+   "dynamic_config" : 0,
+   "generated_by" : "Module::Build version 0.4234",
+   "license" : [
+      "perl_5"
+   ],
+   "meta-spec" : {
+      "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+      "version" : 2
+   },
+   "name" : "API-Eulerian",
+   "prereqs" : {
+      "runtime" : {
+         "requires" : {
+            "Encode" : "0",
+            "File::Slurp" : "0",
+            "JSON" : "0",
+            "JSON::Streaming::Reader" : "0",
+            "LWP::UserAgent" : "0",
+            "Protocol::WebSocket::Client" : "0",
+            "Switch" : "0",
+            "Text::CSV" : "0",
+            "Time::HiRes" : "0"
+         }
+      }
+   },
+   "release_status" : "stable",
+   "resources" : {
+      "license" : [
+         "http://dev.perl.org/licenses/"
+      ]
+   },
+   "version" : "0.7",
+   "x_serialization_backend" : "JSON::PP version 4.04"
+}
