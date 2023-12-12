@@ -37,6 +37,16 @@ use API::Eulerian::EDW::Parser::CSV();
 our @ISA = qw/ API::Eulerian::EDW::Peer /;
 
 #
+# Define default platforms endpoint
+#
+
+my $DEFAULT_PLATFORM = 'fr';
+my %PLATFORMS = (
+  'fr' => 'edw.ea.eulerian.com',
+  'ca' => 'edw.ea.eulerian.ca'
+);
+
+#
 # Defines Parser class name matching format.
 #
 my %PARSERS = (
@@ -182,12 +192,11 @@ sub url
   if( $host ) {
     $url .= $host . ':';
     $url .= $self->ports()->[ $self->secure() ];
-  } elsif( $platform eq 'fr' ) {
-    $url .= 'edw.ea.eulerian.com';
-  } elsif( $platform eq 'ca' ) {
-    $url .= 'edw.ea.eulerian.ca';
   } else {
-    $url = undef;
+    if ( !exists $PLATFORMS{$platform} ) {
+      $platform = $DEFAULT_PLATFORM;
+    }
+    $url .= $PLATFORMS{$platform};
   }
 
   return $url;
