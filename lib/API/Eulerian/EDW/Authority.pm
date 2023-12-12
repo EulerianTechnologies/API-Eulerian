@@ -35,6 +35,7 @@ use API::Eulerian::EDW::Status;
 my %DOMAINS = (
   'fr' => 'api.eulerian.com',
   'ca' => 'api.eulerian.ca',
+  'gv' => 'api.gouv.eulerian.fr',
 );
 #
 # URL Application matching Token Kind.
