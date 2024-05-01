@@ -60,14 +60,14 @@ my %KINDS = (
 #
 sub bearer
 {
-  my ( $class, $kind, $platform, $grid, $ip, $token ) = @_;
+  my ( $class, $kind, $platform, $platform_auth, $grid, $ip, $token ) = @_;
   my $response;
   my $status;
   my $code;
   my $json;
 
   # Get URL used to request API::Eulerian::EDW Authority for Token.
-  $status = $class->_url( $kind, $platform, $grid, $ip, $token );
+  $status = $class->_url( $kind, $platform, $platform_auth, $grid, $ip, $token );
   # Handle errors
   if( ! $status->error() ) {
     # Request API::Eulerian::EDW Authority
@@ -100,6 +100,7 @@ sub bearer
 # @param $class - API::Eulerian::EDW::Authority Class.
 # @param $kind - API::Eulerian::EDW Data Warehouse Token Kind.
 # @param $platform - API::Eulerian::EDW Data Warehouse Platform name.
+# @param $platform_auth - API::Eulerian::EDW Data WareHouse Platform Auth to use.
 # @param $grid - API::Eulerian::EDW Data Warehouse Site Grid name.
 # @param $ip - IP of API::Eulerian::EDW Data Warehouse Peer.
 # @param $token - API::Eulerian::EDW Token.
@@ -108,7 +109,7 @@ sub bearer
 #
 sub _url
 {
-  my ( $class, $kind, $platform, $grid, $ip, $token ) = @_;
+  my ( $class, $kind, $platform, $platform_auth, $grid, $ip, $token ) = @_;
   my $domain;
   #
   # Sanity check mandatories arguments
@@ -141,10 +142,15 @@ sub _url
   #
   #   <Start>get_dw_access_token.json?ip=<ip>&output-as-kv=1
   #
+  my $target_platform = $platform;
+  if ( defined $platform_auth
+    && ($platform ne $platform_auth) ) {
+    $target_platform = $platform_auth;
+  }
   if( ! ( $kind = $KINDS{ $kind } ) ) {
     return $class->_error( 406, "Invalid token kind : $kind" );
-  } elsif( ! ( $domain = $DOMAINS{ $platform } ) ) {
-    return $class->_error( 506, "Invalid platform : $platform" );
+  } elsif( ! ( $domain = $DOMAINS{ $target_platform } ) ) {
+    return $class->_error( 506, "Invalid platform : $target_platform" );
   } else {
     my $status = API::Eulerian::EDW::Status->new();
     my $url;
@@ -226,6 +232,8 @@ Authority services>
 =item * kind - Token Kind ( session, access ).
 
 =item * platform - API::Eulerian::EDW Authority Services Platform ( fr, can ).
+
+=item * platform_auth - Auth platform to supercedes default platform (fr, can)
 
 =item * grid - Customer Grid.
 
