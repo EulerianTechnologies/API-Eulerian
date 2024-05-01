@@ -211,7 +211,7 @@ sub setup
   my ( $self, $setup ) = @_;
 
   foreach my $param ( qw/
-    kind platform hook secure token grid ip host ports / ) {
+    kind platform platform_auth hook secure token grid ip host ports / ) {
     if ( $self->can($param) && exists $setup->{ $param } ) {
       $self->$param( $setup->{$param} );
     }
