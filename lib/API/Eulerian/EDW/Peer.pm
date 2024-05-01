@@ -32,16 +32,17 @@ sub new
   my $class = ref($proto) || $proto;
   my $setup = shift() || {};
   return bless({
-    _CLASS      => $class,
-    _KIND       => 'access',
-    _PLATFORM   => 'fr',
-    _HOOKS      => undef,
-    _TOKEN      => undef,
-    _GRID       => undef,
-    _HOST       => undef,
-    _PORTS      => [ 80, 443 ],
-    _SECURE     => 1,
-    _IP         => undef
+    _CLASS          => $class,
+    _KIND           => 'access',
+    _PLATFORM       => 'fr',
+    _PLATFORM_AUTH  => 'fr',
+    _HOOKS          => undef,
+    _TOKEN          => undef,
+    _GRID           => undef,
+    _HOST           => undef,
+    _PORTS          => [ 80, 443 ],
+    _SECURE         => 1,
+    _IP             => undef
   });
 }
 
@@ -111,6 +112,24 @@ sub platform
   $self->{ _PLATFORM } = $platform if defined( $platform );
   return $self->{ _PLATFORM };
 }
+
+#
+# @brief Platform Auth attribute accessors. In the case we want
+# to fetch data on a CA platform but auth is to be done on FR,
+# if not defined, defaults to platform
+#
+# @param $self - Eulerian Data Warehouse Peer.
+# @param $platform_auth - Eulerian Data Warehouse Platform.
+#
+# @return Eulerian Data Warehouse Platform.
+#
+sub platform_auth
+{
+  my ( $self, $platform_auth ) = @_;
+  $self->{ _PLATFORM_AUTH } = $platform_auth if defined( $platform_auth );
+  return $self->{ _PLATFORM_AUTH } || $self->{ _PLATFORM };
+}
+
 #
 # @brief Hook attribute accessors.
 #
@@ -220,6 +239,7 @@ sub dump
   $dump .= 'Class    : ' . $self->class() . "\n";
   $dump .= 'Kind     : ' . $self->kind() . "\n";
   $dump .= 'Platform : ' . $self->platform() . "\n";
+  $dump .= 'Platform Auth : ' . $self->platform_auth() . "\n";
   $dump .= 'Hook    : ' . $hook . "\n";
   $dump .= 'Token    : ' . $self->token() . "\n";
   $dump .= 'Grid     : ' . $self->grid() . "\n";
@@ -246,7 +266,7 @@ sub _bearer
   if( ! defined( $bearer ) ) {
     # Request Authority Services for a valid bearer
     $status = API::Eulerian::EDW::Authority->bearer(
-      $self->kind(), $self->platform(),
+      $self->kind(), $self->platform(), $self->platform_auth(),
       $self->grid(), $self->ip(),
       $self->token()
     );
