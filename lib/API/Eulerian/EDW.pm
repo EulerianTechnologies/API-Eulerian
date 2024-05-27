@@ -25,6 +25,9 @@ sub get_csv_file {
   }
 
   my $status = $peer->request( $query );
+  
+  # kill request at EDW for clean-up
+  $peer->cancel();
 
   if ( $status->error() ) {
     return {
@@ -33,8 +36,6 @@ sub get_csv_file {
     };
   }
 
-  # kill request at EDW for clean-up
-  $peer->cancel();
 
   return { error => 0, path2file => $status->path() };
 }
