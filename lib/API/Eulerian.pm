@@ -2,7 +2,7 @@ package API::Eulerian;
 
 use strict;
 
-our $VERSION = '1.2';
+our $VERSION = '1.3';
 
 1;
 __END__
