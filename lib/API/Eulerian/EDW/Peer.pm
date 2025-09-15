@@ -36,6 +36,7 @@ sub new
     _KIND           => 'access',
     _PLATFORM       => 'fr',
     _PLATFORM_AUTH  => 'fr',
+    _BEARER         => undef,
     _HOOKS          => undef,
     _TOKEN          => undef,
     _GRID           => undef,
@@ -201,6 +202,20 @@ sub token
   return $self->{ _TOKEN };
 }
 #
+# @brief Bearer attribute accessors.
+#
+# @param $self - Eulerian Data Warehouse Peer.
+# @param $bearer - Eulerian EDW Bearer Session Token.
+#
+# @return Eulerian Bearer.
+#
+sub bearer
+{
+  my ( $self, $bearer ) = @_;
+  $self->{ _BEARER } = $bearer if defined( $bearer );
+  return $self->{ _BEARER };
+}
+#
 # @brief Setup Eulerian Data Warehouse Peer.
 #
 # @param $self - Eulerian Data Warehouse Peer.
@@ -211,7 +226,7 @@ sub setup
   my ( $self, $setup ) = @_;
 
   foreach my $param ( qw/
-    kind platform platform_auth hook secure token grid ip host ports / ) {
+    kind platform platform_auth hook secure token grid ip host ports bearer / ) {
     if ( $self->can($param) && exists $setup->{ $param } ) {
       $self->$param( $setup->{$param} );
     }
@@ -242,6 +257,7 @@ sub dump
   $dump .= 'Platform Auth : ' . $self->platform_auth() . "\n";
   $dump .= 'Hook    : ' . $hook . "\n";
   $dump .= 'Token    : ' . $self->token() . "\n";
+  $dump .= 'Bearer    : ' . $self->bearer() . "\n";
   $dump .= 'Grid     : ' . $self->grid() . "\n";
   $dump .= 'Secure   : ' . $secure . "\n";
   $dump .= 'Ip       : ' . $self->ip() . "\n";
