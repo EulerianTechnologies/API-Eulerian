@@ -212,7 +212,7 @@ sub token
 sub bearer
 {
   my ( $self, $bearer ) = @_;
-  $self->{ _BEARER } = $bearer if defined( $bearer );
+  $self->{ _BEARER } = 'Bearer '.$bearer if defined( $bearer );
   return $self->{ _BEARER };
 }
 #
