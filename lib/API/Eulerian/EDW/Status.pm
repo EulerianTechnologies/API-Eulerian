@@ -34,7 +34,7 @@ sub new
       _ERROR => 0,
       _MSG => '',
       _CODE => 0,
-      _URL = '',
+      _URL => '',
     }, $class
   );
 }
