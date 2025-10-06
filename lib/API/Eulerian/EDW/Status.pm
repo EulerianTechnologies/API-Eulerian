@@ -34,6 +34,7 @@ sub new
       _ERROR => 0,
       _MSG => '',
       _CODE => 0,
+      _URL = '',
     }, $class
   );
 }
@@ -79,6 +80,20 @@ sub error
   $self->{ _ERROR } = $error if defined( $error );
   return $self->{ _ERROR };
 }
+#
+# @brief Get/Set URL.
+#
+# @param $self - API::Eulerian::EDW::Status instance.
+# @param $url - Url.
+#
+# @return Url.
+#
+sub url
+{
+  my ( $self, $url ) = @_;
+  $self->{ _URL } = $url if defined( $url );
+  return $self->{ _URL };
+}
 sub path
 {
   my $self = shift;
@@ -95,10 +110,12 @@ sub dump
   my $error = $self->error() ? 'Yes' : 'No';
   my $code = $self->code();
   my $msg = $self->msg();
+  my $url = $self->url();
   my $string = <<string_end;
     Error   : $error
     Code    : $code
     Message : $msg
+    Url     : $url
 string_end
   print( $string );
 }
