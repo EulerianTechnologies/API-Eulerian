@@ -183,6 +183,7 @@ sub _request
       $status->error( 1 );
       $status->msg( "Mandatory argument to post request is/are missing" );
       $status->code( 400 );
+      $status->url( $url );
       return $status;
     } else {
       # Setup Content_Length and Content_Type
@@ -223,6 +224,7 @@ sub _request
       defined( $json ) ?
         encode_json( $json ) : $response->content()
       );
+    $status->url( $url );
   } else {
     if( defined( $response->header( 'content-encoding' ) ) ) {
       $status->{ encoding } = $response->header( 'content-encoding' );
