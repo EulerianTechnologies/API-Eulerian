@@ -32,7 +32,7 @@ sub get_csv_file {
   if ( $status->error() ) {
     return {
       error => 1,
-      error_msg => $status->msg()
+      error_msg => $status->msg().' for url='.$status->url()
     };
   }
 
