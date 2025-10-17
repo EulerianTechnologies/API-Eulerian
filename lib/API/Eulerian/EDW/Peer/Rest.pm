@@ -72,7 +72,18 @@ sub new
   # Setup Rest Peer Default attributes values
   $self->{ _ACCEPT } = $setup->{accept} || 'application/json';
   $self->{ _ENCODING } = 'gzip';
-  $self->{ _WDIR } = $setup->{wdir} || '/tmp';
+  
+  my $wdir = $setup->{wdir};
+  if ( !defined $wdir ) {
+    foreach my $twdir ( '/opt/tmp-fs', '/tmp' ) {
+      if ( -e $twdir && -w $twdir ) {
+        $wdir = $twdir;
+        last;
+      }
+    }
+  }
+  $self->{ _WDIR } = $wdir;
+  
   $self->{ _UUID } = 0;
 
   # Setup Rest Peer Attributes
