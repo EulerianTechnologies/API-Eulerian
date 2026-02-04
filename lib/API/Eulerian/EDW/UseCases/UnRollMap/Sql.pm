@@ -1,20 +1,54 @@
-
-package API::Eulerian::EDW::UseCases::RollMap;
-
-use API::Eulerian::EDW::Sql::Builder;
+###############################################################################
+#
+# @brief RollMap EDW sql builder implementation.
+#
+# This module is used to produce a D3 SanKey Map datas. Those datas allow to
+# draw a palmares of pages read before a given page.
+#
+# @file API/Eulerian/EDW/UseCases/UnRollMap.pm
+#
+# @date 2026/02/03
+#
+###############################################################################
+#
+# Enforce compilor rules.
+#
 use strict; use warnings;
+#
+# Define package name.
+#
+package API::Eulerian::EDW::UseCases::UnRollMap;
+#
+# Use Sql::Builder.
+#
+use API::Eulerian::EDW::Sql::Builder;
+#
+# Import Exporter.
+#
 use base 'Exporter';
-
+#
+# Define exported interface
+#
 our @EXPORT = qw( Sql );
-
+#
+# @brief Add Timerange.
+#
+# @param $builder - Sql builder.
+# @param $setup - Request setup.
+#
 sub AddTimerange
 {
   my ( $builder, $setup ) = @_;
-  $builder->timerange(
-    $setup->{ from }, $setup->{ to }
-    );
+  $builder->timerange( $setup->{ from }, $setup->{ to } );
 }
-
+#
+# @brief Get an array from a hash map entry.
+#
+# @param $hash - Hash map.
+# @param $key - Key.
+#
+# @return Array.
+#
 sub ToArray
 {
   my ( $hash, $key ) = @_;
@@ -22,7 +56,12 @@ sub ToArray
   $value = [ $value ] if ref( $value ) ne 'ARRAY';
   return $value;
 }
-
+#
+# @brief Add Pageview reader.
+#
+# @param $builder - Sql builder.
+# @param $setup - Request setup.
+#
 sub AddPageview
 {
   my ( $builder, $setup ) = @_;
@@ -64,7 +103,12 @@ sub AddPageview
   );
 
 }
-
+#
+# @brief Add Clickview reader.
+#
+# @param $builder - Sql builder.
+# @param $setup - Request setup.
+#
 sub AddClickview
 {
   my ( $builder, $setup ) = @_;
@@ -79,69 +123,84 @@ sub AddClickview
     $filter .= "clickview.channel.odmedia == '";
     $filter .= $medias->[ 0 ];
     $filter .= "'";
-    # Add clickview reader
-    $builder->readers(
-      'clickview', 'ea:clickview', $setup->{ site }, $filter
-    );
   } elsif( $nmedias > 1 ) {
     $filter .= 'IN( clickview.channel.odmedia, ';
     $filter .= join( ', ', map { '"' . $_ . '"' } @$medias );
     $filter .= ' )';
   }
-  # Add clickview reader
   if( $filter ne '' ) {
+    # Add clickview reader
     $builder->readers(
       'clickview', 'ea:clickview', $setup->{ site }, $filter
       );
   }
 
 }
-
-sub AddMerged
-{
-  my ( $builder, $setup ) = @_;
-  my $filter;
-
-  # Setup visit filter
-  $filter  = 'merged.first.pageview.page.name != pageview.page.name';
-
-  # Create visit
-  $builder->groups( 'merged', 'pageview', $filter );
-
-}
-
+#
+# @brief Add group visit.
+#
+# @param $builder - Sql builder.
+# @param $setup - Request setup.
+#
 sub AddVisit
 {
   my ( $builder, $setup ) = @_;
   my $filter;
 
   # Setup visit filter
-  $filter  = 'visit.last.merged.first.pageview.timestamp + MINS( ';
+  $filter  = 'visit.last.pageview.timestamp + MINS( ';
   $filter .= int( $setup->{ session } || 30 );
-  $filter .= ' ) < merged.first.pageview.timestamp';
-
+  $filter .= ' ) < pageview.timestamp';
   # Create visit
-  $builder->groups( 'visit', 'merged', $filter );
+  $builder->groups( 'visit', 'pageview', $filter );
 
 }
-
+#
+# @brief Join visit and clickview.
+#
+# @param $builder - Sql builder.
+# @param $setup - Request setup.
+#
 sub AddJoin
 {
   my ( $builder, $setup ) = @_;
-  my $media = $setup->{ 'media-shortname' } || undef;
   my $imedia = int( $setup->{ 'media-id' } || 0 );
 
   if( $imedia ) {
     # Setup join filter
-    my $filter  = "clickview.timestamp >= visit.first.merged.first.pageview.timestamp && ";
-    $filter .= "clickview.timestamp <= visit.last.merged.last.pageview.timestamp";
+    my $filter = 'clickview.timestamp >= visit.first.pageview.timestamp && ';
+    $filter .= 'clickview.timestamp <= visit.last.pageview.timestamp';
     # Add join on clickview
     $builder->joins( 'join', 'visit', 'clickview', $filter );
   }
 
   return $imedia;
 }
-
+#
+# @brief Add aliases.
+#
+# @param $builder - Sql builder.
+# @param $setup - Request setup.
+#
+sub AddAliases
+{
+  my ( $builder, $prefix, $setup ) = @_;
+  my $npages = int( $setup->{ npages } || 5 );
+  my $target = "'" . $setup->{ target } . "'";
+  # Target Alias
+  $builder->aliases( "Target", $target );
+  # PageId Alias
+  $builder->aliases(
+    "PageId",
+    "visit.find_last( visit.current.pageview.page.name == Target )"
+    );
+}
+#
+# @brief Add outputs.
+#
+# @param $builder - Sql builder.
+# @param $setup - Request setup.
+#
 sub AddOutputs
 {
   my ( $builder, $prefix, $setup ) = @_;
@@ -149,60 +208,44 @@ sub AddOutputs
 
   # Add outputs
   for my $ioutput ( 0 ... $npages - 1 ) {
-    $builder->outputs( "Page$ioutput" );
-  }
-
-}
-
-sub AddFilter
-{
-  my ( $builder, $prefix, $setup ) = @_;
-  my $roots = ToArray( $setup, 'roots' );
-
-  # Add outputs filter
-  if( defined( $roots ) && scalar( @$roots ) > 0 ) {
-    my $filter = '';
-
-    if( $prefix ne '' ) {
-      $filter .= $prefix;
-      $filter .= "visit.first.merged.first.pageview.timestamp != NULL && ";
-    }
-    if( scalar( @$roots ) == 1 ) {
-      $filter .= "Page0 == '";
-      $filter .= $roots->[ 0 ];
-      $filter .= "'";
-    } elsif( scalar( @$roots ) > 1 ) {
-      $filter .= "IN( ";
-      $filter .= 'Page0, ';
-      $filter .= join( ', ', map { '"' . $_ . '"' } @$roots );
-      $filter .= " )";
-    }
-    $builder->filter( $filter );
-
-  }
-
-}
-
-sub AddThen
-{
-  my ( $builder, $setup ) = @_;
-  my $palmares = int( $setup->{ npalmares } || 5 );
-  $builder->thens( "RollMap( $palmares )" );
-}
-
-sub AddAliases
-{
-  my ( $builder, $prefix, $setup ) = @_;
-  my $npages = int( $setup->{ npages } || 5 );
-
-  for my $ialias ( 0 ... $npages - 1 ) {
-    $builder->aliases(
-      "Page$ialias", "${prefix}visit.items( $ialias ).merged.first.pageview.page.name"
+    $builder->outputs(
+      "visit.items( PageId - $ioutput ).pageview.page.name"
     );
   }
 
 }
-
+#
+# @brief Add outputs filter.
+#
+# @param $builder - Sql builder.
+# @param $setup - Request setup.
+#
+sub AddFilter
+{
+  my ( $builder, $prefix, $setup ) = @_;
+  my $filter = 'PageId != NULL';
+  $builder->filter( $filter );
+}
+#
+# @brief Add Post processing command.
+#
+# @param $builder - Sql builder.
+# @param $setup - Request setup.
+#
+sub AddThen
+{
+  my ( $builder, $setup ) = @_;
+  my $palmares = int( $setup->{ npalmares } || 5 );
+  $builder->thens( "UnRollMap( $palmares )" );
+}
+#
+# @brief Forge SQL request used to produce DS3 Sankey Map
+#        Graph.
+#
+# @param $setup - Request setup.
+#
+# @return Sql request.
+#
 sub Sql
 {
   my $builder = new API::Eulerian::EDW::Sql::Builder();
@@ -214,9 +257,8 @@ sub Sql
   $builder->master( 'visit' );
   AddTimerange( $builder, $setup );
   AddPageview( $builder, $setup );
-  AddClickview( $builder, $setup );
-  AddMerged( $builder, $setup );
   AddVisit( $builder, $setup );
+  AddClickview( $builder, $setup );
   if( AddJoin( $builder, $setup ) ) {
     $builder->master( 'join' );
     $prefix = 'join.';

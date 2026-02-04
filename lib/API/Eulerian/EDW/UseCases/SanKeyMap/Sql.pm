@@ -112,9 +112,10 @@ sub AddJoin
 sub AddOutputs
 {
   my ( $builder, $prefix, $setup ) = @_;
+  my $npages = int( $setup->{ npages } || 5 );
 
   # Add outputs
-  for my $ioutput ( 0 ... $setup->{ npages } - 1 ) {
+  for my $ioutput ( 0 ... $npages - 1 ) {
     my $output = $prefix;
     $output .= "visit.items( $ioutput ).pageview.page.name";
     $builder->outputs( $output );
