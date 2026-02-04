@@ -1,4 +1,3 @@
-
 package API::Eulerian::EDW::UseCases::SanKeyMap;
 
 use API::Eulerian::EDW::Sql::Builder;
@@ -15,24 +14,32 @@ sub AddTimerange
     );
 }
 
+sub ToArray
+{
+  my ( $hash, $key ) = @_;
+  my $value = $hash->{ $key } || [];
+  $value = [ $value ] if ref( $value ) ne 'ARRAY';
+  return $value;
+}
+
 sub AddPageview
 {
   my ( $builder, $setup ) = @_;
-  my @devices = @{ $setup->{ 'mdevicetypefull-name' } || [] };
-  my @subkeys = @{ $setup->{ 'subkey2-name' } || [] };
-  my $ndevices = scalar( @devices );
-  my $nsubkeys = scalar( @subkeys );
+  my $devices = ToArray( $setup, 'mdevicetypefull-name' );
+  my $subkeys = ToArray( $setup, 'subkey2-name' );
+  my $ndevices = scalar( @$devices );
+  my $nsubkeys = scalar( @$subkeys );
   my $filter = '';
 
   # Handle pageview filtering on devices if any
   if( $ndevices == 1 ) {
     $filter .= 'pageview.device.devicetype.type == ';
     $filter .= "'";
-    $filter .= $devices[ 0 ];
+    $filter .= $devices->[ 0 ];
     $filter .= "'";
   } elsif( $ndevices > 1 ) {
     $filter .= 'IN( pageview.device.devicetype.type, ';
-    $filter .= join( ', ', map { '"' . $_ . '"' } @devices );
+    $filter .= join( ', ', map { '"' . $_ . '"' } @$devices );
     $filter .= ' )';
   }
 
@@ -41,12 +48,12 @@ sub AddPageview
     if( $ndevices ) { $filter .= " && "; }
     $filter .= 'pageview.subkey2.name == ';
     $filter .= "'";
-    $filter .= $subkeys[ 0 ];
+    $filter .= $subkeys->[ 0 ];
     $filter .= "'";
   } elsif( $nsubkeys > 1 ) {
     if( $ndevices ) { $filter .= " && "; }
     $filter .= 'IN( pageview.subkey2.name, ';
-    $filter .= join( ', ', map { '"' . $_ . '"' } @subkeys );
+    $filter .= join( ', ', map { '"' . $_ . '"' } @$subkeys );
     $filter .= ' )';
   }
 
@@ -60,19 +67,30 @@ sub AddPageview
 sub AddClickview
 {
   my ( $builder, $setup ) = @_;
-  my $media = $setup->{ 'media-shortname' } || undef;
-  my $imedia = int( $setup->{ 'media-id' } || 0 );
+  my $medias = ToArray( $setup, 'media-shortname' );
+  my $nmedias = scalar( @$medias );
+  my $filter = '';
 
   # Handle clickview if need it */
-  if( $imedia ) {
+  if( $nmedias == 1 ) {
     # Setup clickview filter
-    my $filter  = "clickview.channel.odmedia == '";
-    $filter .= $media;
+    $filter .= "clickview.channel.odmedia == '";
+    $filter .= $medias->[ 0 ];
     $filter .= "'";
     # Add clickview reader
     $builder->readers(
       'clickview', 'ea:clickview', $setup->{ site }, $filter
     );
+  } elsif( $nmedias > 1 ) {
+    $filter .= 'IN( clickview.channel.odmedia, ';
+    $filter .= join( ', ', map { '"' . $_ . '"' } @$medias );
+    $filter .= ' )';
+  }
+  # Add clickview reader
+  if( $filter ne '' ) {
+    $builder->readers(
+      'clickview', 'ea:clickview', $setup->{ site }, $filter
+      );
   }
 
 }
@@ -126,10 +144,10 @@ sub AddOutputs
 sub AddFilter
 {
   my ( $builder, $prefix, $setup ) = @_;
-  my $roots = $setup->{ 'roots' };
+  my $roots = ToArray( $setup, 'roots' );
 
   # Add outputs filter
-  if( defined( $roots ) && scalar( @$roots ) > 0 ) {
+  if( scalar( @$roots ) > 0 ) {
     my $filter = '';
 
     if( $prefix ne '' ) {
