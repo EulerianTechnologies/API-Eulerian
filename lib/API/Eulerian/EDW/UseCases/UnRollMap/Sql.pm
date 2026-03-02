@@ -168,8 +168,10 @@ sub AddJoin
 
   if( $imedia ) {
     # Setup join filter
-    my $filter = 'clickview.timestamp >= visit.first.pageview.timestamp && ';
-    $filter .= 'clickview.timestamp <= visit.last.pageview.timestamp';
+    my $filter = '';
+    $filter .= 'clickview.timestamp >= visit.first.pageview.timestamp && ';
+    $filter .= 'clickview.timestamp <= visit.last.pageview.timestamp && ';
+    $filter .= 'join.count() < 1 ';
     # Add join on clickview
     $builder->joins( 'join', 'visit', 'clickview', $filter );
   }
