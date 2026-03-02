@@ -136,7 +136,7 @@ sub AddJoin
     my $filter = '';
     $filter .= "clickview.timestamp >= visit.first.merged.first.pageview.timestamp && ";
     $filter .= "clickview.timestamp <= visit.last.merged.last.pageview.timestamp && ";
-    $filter .= "join.count() < 1 "
+    $filter .= "join.count() < 1 ";
     # Add join on clickview
     $builder->joins( 'join', 'visit', 'clickview', $filter );
   }
