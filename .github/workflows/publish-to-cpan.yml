@@ -1,0 +1,72 @@
+name: Publish to CPAN
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Git tag to publish"
+        required: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout selected tag
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag }}
+
+      - name: Extract version from tag
+        id: tag_version
+        run: |
+          TAG="${{ github.event.inputs.tag }}"
+          VERSION="${TAG#v}"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Setup Perl
+        uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: "5.38"
+
+      - name: Install dependencies
+        run: |
+          cpanm --notest Module::Build
+          cpanm --installdeps --notest .
+
+      - name: Verify VERSION matches module
+        run: |
+          MODULE_VERSION=$(perl -ne 'print $1 if /\$VERSION\s*=\s*["'\'']([^"'\'']+)/' lib/API/Eulerian.pm)
+          echo "Module version: $MODULE_VERSION"
+          echo "Tag version: ${{ steps.tag_version.outputs.version }}"
+          if [ "$MODULE_VERSION" != "${{ steps.tag_version.outputs.version }}" ]; then
+            echo "ERROR: VERSION mismatch!"
+            exit 1
+          fi
+
+      - name: Build distribution
+        run: |
+          perl Build.PL
+          ./Build
+          ./Build dist
+
+      - name: Check tarball version
+        run: |
+          TAR=$(ls *.tar.gz)
+          echo "Built tarball: $TAR"
+          echo "$TAR" | grep "${{ steps.tag_version.outputs.version }}" || \
+            (echo "ERROR: Tarball version mismatch!" && exit 1)
+
+      - name: Upload to PAUSE
+        env:
+          PAUSE_USER: ${{ secrets.PAUSE_USER }}
+          PAUSE_PASSWORD: ${{ secrets.PAUSE_PASSWORD }}
+        run: |
+          cpanm --notest CPAN::Uploader
+          TAR=$(ls *.tar.gz)
+          perl -MCPAN::Uploader -e '
+            CPAN::Uploader->new({
+              user => $ENV{PAUSE_USER},
+              password => $ENV{PAUSE_PASSWORD}
+            })->upload($ARGV[0]);
+          ' "$TAR"
