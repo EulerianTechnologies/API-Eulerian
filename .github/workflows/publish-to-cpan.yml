@@ -36,7 +36,7 @@ jobs:
 
       - name: Verify VERSION matches module
         run: |
-          MODULE_VERSION=$(perl -ne 'print $1 if /\$VERSION\s*=\s*["'\'']([^"'\'']+)/' lib/API/Eulerian.pm)
+          MODULE_VERSION=$(perl -ne 'print $1 if /\$VERSION\s*=\s*["'\''"]([^"'\'']+)/' lib/API/Eulerian.pm)
           echo "Module version: $MODULE_VERSION"
           echo "Tag version: ${{ steps.tag_version.outputs.version }}"
           if [ "$MODULE_VERSION" != "${{ steps.tag_version.outputs.version }}" ]; then
@@ -63,10 +63,4 @@ jobs:
           PAUSE_PASSWORD: ${{ secrets.PAUSE_PASSWORD }}
         run: |
           cpanm --notest CPAN::Uploader
-          TAR=$(ls *.tar.gz)
-          perl -MCPAN::Uploader -e '
-            CPAN::Uploader->new({
-              user => $ENV{PAUSE_USER},
-              password => $ENV{PAUSE_PASSWORD}
-            })->upload($ARGV[0]);
-          ' "$TAR"
+          cpan-upload --user "$PAUSE_USER" --password "$PAUSE_PASSWORD" *.tar.gz
