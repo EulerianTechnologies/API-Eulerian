@@ -79,10 +79,6 @@ sub AddClickview
     $filter .= "clickview.channel.odmedia == '";
     $filter .= $medias->[ 0 ];
     $filter .= "'";
-    # Add clickview reader
-    $builder->readers(
-      'clickview', 'ea:clickview', $setup->{ site }, $filter
-    );
   } elsif( $nmedias > 1 ) {
     $filter .= 'IN( clickview.channel.odmedia, ';
     $filter .= join( ', ', map { '"' . $_ . '"' } @$medias );
