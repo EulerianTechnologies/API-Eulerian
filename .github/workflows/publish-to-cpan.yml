@@ -48,6 +48,7 @@ jobs:
         run: |
           perl Build.PL
           ./Build
+          ./Build manifest
           ./Build dist
 
       - name: Check tarball version
