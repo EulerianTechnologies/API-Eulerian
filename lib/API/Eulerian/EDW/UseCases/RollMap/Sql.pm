@@ -158,10 +158,11 @@ sub AddFilter
   my $filter = '';
   
   # Add outputs filter  
-  $filter .= "$prefixvisit.first.merged.first.pageview.rtvisit == 1 ";
+  $filter .= $prefix;
+  $filter .= 'visit.first.merged.first.pageview.rtvisit == 1 ';
   
   if( defined( $roots ) && scalar( @$roots ) > 0 ) {
-    $filter .= ' && ';
+    $filter .= '&& ';
     if( $prefix ne '' ) {
       $filter .= $prefix;
       $filter .= "visit.first.merged.first.pageview.timestamp != NULL && ";
