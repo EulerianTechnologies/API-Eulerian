@@ -100,6 +100,7 @@ sub AddMerged
 
   # Setup visit filter
   $filter  = 'merged.first.pageview.page.name != pageview.page.name';
+  $filter .= ' || pageview.rtvisit == 1';
 
   # Create visit
   $builder->groups( 'merged', 'pageview', $filter );
@@ -112,10 +113,8 @@ sub AddVisit
   my $filter;
 
   # Setup visit filter
-  $filter  = 'visit.last.merged.first.pageview.timestamp + MINS( ';
-  $filter .= int( $setup->{ session } || 30 );
-  $filter .= ' ) < merged.first.pageview.timestamp';
-
+  $filter = 'pageview.rtvisit == 1';
+  
   # Create visit
   $builder->groups( 'visit', 'merged', $filter );
 
@@ -156,11 +155,13 @@ sub AddFilter
 {
   my ( $builder, $prefix, $setup ) = @_;
   my $roots = ToArray( $setup, 'roots' );
-
-  # Add outputs filter
+  my $filter = '';
+  
+  # Add outputs filter  
+  $filter .= "$prefixvisit.first.merged.first.pageview.rtvisit == 1 ";
+  
   if( defined( $roots ) && scalar( @$roots ) > 0 ) {
-    my $filter = '';
-
+    $filter .= ' && ';
     if( $prefix ne '' ) {
       $filter .= $prefix;
       $filter .= "visit.first.merged.first.pageview.timestamp != NULL && ";
@@ -175,10 +176,8 @@ sub AddFilter
       $filter .= join( ', ', map { '"' . $_ . '"' } @$roots );
       $filter .= " )";
     }
-    $builder->filter( $filter );
-
   }
-
+  $builder->filter( $filter );
 }
 
 sub AddThen
