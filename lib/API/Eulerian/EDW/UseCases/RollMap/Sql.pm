@@ -165,7 +165,7 @@ sub AddFilter
     $filter .= '&& ';
     if( $prefix ne '' ) {
       $filter .= $prefix;
-      $filter .= "visit.first.merged.first.pageview.timestamp != NULL && ";
+      $filter .= ".clickview.timestamp != NULL && ";
     }
     if( scalar( @$roots ) == 1 ) {
       $filter .= "Page0 == '";
