@@ -148,9 +148,8 @@ sub AddVisit
   my $filter;
 
   # Setup visit filter
-  $filter  = 'visit.last.pageview.timestamp + MINS( ';
-  $filter .= int( $setup->{ session } || 30 );
-  $filter .= ' ) < pageview.timestamp';
+  $filter  = 'pageview.rtvisit == 1';
+
   # Create visit
   $builder->groups( 'visit', 'pageview', $filter );
 
