@@ -193,7 +193,7 @@ sub AddAliases
   # PageId Alias
   $builder->aliases(
     "PageId",
-    "visit.find_last( visit.current.pageview.page.name == Target )"
+    "${prefix}visit.find_last( ${prefix}visit.current.pageview.page.name == Target )"
     );
 }
 #
@@ -210,7 +210,7 @@ sub AddOutputs
   # Add outputs
   for my $ioutput ( 0 ... $npages - 1 ) {
     $builder->outputs(
-      "visit.items( PageId - $ioutput ).pageview.page.name"
+      "${prefix}visit.items( PageId - $ioutput ).pageview.page.name"
     );
   }
 
@@ -225,7 +225,13 @@ sub AddFilter
 {
   my ( $builder, $prefix, $setup ) = @_;
   my $filter = 'PageId != NULL';
+
+  if( $prefix ne '' ) {
+    $filter .= ' && ';
+    $filter .= "${prefix}clickview.timestamp != NULL";
+  }
   $builder->filter( $filter );
+  
 }
 #
 # @brief Add Post processing command.
