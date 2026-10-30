@@ -113,6 +113,7 @@ sub json
       chomp( $data );
       if( length( $data ) > 0 ) {
         $data = encode( 'utf-8', $data );
+        $data =~ s/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]//g;
         $data = decode_json( $data );
        } else {
         $data = undef;
